@@ -1,0 +1,36 @@
+{
+  "name": "service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "tsc && node dist/main.js",
+    "dev:tsx": "tsx src/main.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "drizzle:generate": "drizzle-kit generate:pg --config=drizzle.config.ts",
+    "drizzle:push": "drizzle-kit push:pg --config=drizzle.config.ts",
+    "drizzle:migrate": "drizzle-kit migrate:pg --config=drizzle.config.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "volta": {
+    "node": "22.16.0",
+    "npm": "11.4.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "drizzle-orm": "^0.44.2",
+    "pg": "^8.11.3",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "drizzle-kit": "^0.31.1",
+    "tsx": "^4.20.3"
+  }
+}
