@@ -1,4 +1,5 @@
 import type { Config } from 'drizzle-kit';
+import 'dotenv/config'
 
 export default {
   schema: './src/schema.ts',
@@ -10,6 +11,6 @@ export default {
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'darwint',
-    ssl: false,
+    ssl: process.env.NODE_ENV === 'production' ? true : false,
   },
 } satisfies Config; 

@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, timestamp, pgEnum, jsonb } from 'drizzle-orm/pg-core';
 import { customType } from 'drizzle-orm/pg-core';
 
 // custom money type for PostgreSQL
@@ -22,14 +22,19 @@ export const expenses = pgTable('expenses', {
   description: text('description').notNull(),
   amount: money('amount').notNull(),
   category: text('category').notNull(),
+  telegramMessageId: integer('telegram_message_id').notNull(),
   addedAt: timestamp('added_at').notNull(),
 });
+
+export const messageStatusEnum = pgEnum('message_status', ['pending', 'sent', 'failed', 'parsed']);
 
 export const messagesQueue = pgTable('messages_queue', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').notNull().references(() => users.id),
-  message: text('message').notNull(),
-  status: text('status').notNull().default('pending'), // pending, sent, failed
+  chatId: text('chat_id').notNull(),
+  telegramMessageId: integer('telegram_message_id').notNull(),
+  payload: jsonb('payload').notNull(),
+  status: messageStatusEnum('status').notNull().default('pending'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   processedAt: timestamp('processed_at'),
 });
@@ -40,3 +45,6 @@ export type Expense = typeof expenses.$inferSelect;
 export type NewExpense = typeof expenses.$inferInsert;
 export type MessageQueue = typeof messagesQueue.$inferSelect;
 export type NewMessageQueue = typeof messagesQueue.$inferInsert; 
+
+export const NEW_MESSAGE_CHANNEL = "messages_queue_broadcast_new"
+export const PARSED_MESSAGE_CHANNEL = "messages_queue_broadcast_parsed"

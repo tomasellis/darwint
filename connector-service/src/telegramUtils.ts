@@ -8,6 +8,17 @@ if (!TELEGRAM_BOT_TOKEN) {
   throw new Error('TELEGRAM_BOT_TOKEN is not set in environment variables');
 }
 
+export type TelegramCallbackQueryData = 'remove' | 'accept'
+
+export interface TelegramCallbackQuery {
+  id: string;
+  from: TelegramUser;
+  message?: TelegramMessage;
+  inline_message_id?: string;
+  chat_instance: string;
+  data?: TelegramCallbackQueryData;
+}
+
 export interface TelegramUpdate {
   update_id: number;
   message?: TelegramMessage;
@@ -33,6 +44,7 @@ export interface TelegramMessage {
   date: number;
   text?: string;
   entities?: TelegramMessageEntity[];
+  reply_to_message?: Omit<TelegramMessage, 'reply_to_message'>;
 }
 
 export interface TelegramUser {
@@ -179,11 +191,11 @@ export async function getUpdates(
 export async function sendMessage(
   chat_id: number | string,
   text: string,
+  reply_to_message_id?: number,
+  reply_markup?: any,
   parse_mode?: 'Markdown' | 'HTML',
   disable_web_page_preview?: boolean,
   disable_notification?: boolean,
-  reply_to_message_id?: number,
-  reply_markup?: any
 ): Promise<SendMessageResponse> {
   const params: Record<string, any> = {
     chat_id,
@@ -196,6 +208,8 @@ export async function sendMessage(
   if (reply_to_message_id !== undefined) params.reply_to_message_id = reply_to_message_id;
   if (reply_markup !== undefined) params.reply_markup = reply_markup;
 
+  console.log('using params for send message:', {params})
+
   return makeTelegramRequest<SendMessageResponse>('sendMessage', params);
 }
 
@@ -204,4 +218,55 @@ export async function sendMessage(
  */
 export async function getMe(): Promise<TelegramUser> {
   return makeTelegramRequest<TelegramUser>('getMe');
+}
+
+/**
+ * Deletes a message in a chat.
+ * 
+ * Calls the Telegram Bot API's `deleteMessage` method to remove a message from a chat.
+ * 
+ * @param chat_id - Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+ * @param message_id - Identifier of the message to delete
+ * @returns A Promise that resolves when the message is deleted
+ * @see https://core.telegram.org/bots/api#deletemessage
+ */
+export async function deleteMessage(
+  chat_id: number | string,
+  message_id: number
+): Promise<void> {
+  await makeTelegramRequest('deleteMessage', { chat_id, message_id });
+}
+
+/**
+ * Answers a callback query sent from an inline keyboard button.
+ * 
+ * This notifies the user that their button press was received and can optionally display a popup notification.
+ * 
+ * @param callback_query_id - Unique identifier for the query to be answered
+ * @param text - (Optional) Text of the notification to be shown as an alert to the user
+ * @returns A Promise that resolves when the callback query is answered
+ */
+export async function answerCallbackQuery(
+  callback_query_id: string,
+  text?: string
+): Promise<void> {
+  await makeTelegramRequest('answerCallbackQuery', { callback_query_id, text });
+}
+
+/**
+ * Generates a Telegram inline keyboard markup object for reply buttons.
+ * @param buttons - An array of button definitions, each with text and callback_data.
+ *   Example: [{ text: "Button 1", callback_data: "data1" }, ...]
+ * @param rowWidth - Number of buttons per row (default: 1)
+ * @returns An object with the `inline_keyboard` property.
+ */
+export function generateInlineKeyboardMarkup(
+  buttons: { text: string; callback_data: TelegramCallbackQueryData }[],
+  rowWidth: number = 1
+): { inline_keyboard: { text: string; callback_data: string }[][] } {
+  const inline_keyboard: { text: string; callback_data: string }[][] = [];
+  for (let i = 0; i < buttons.length; i += rowWidth) {
+    inline_keyboard.push(buttons.slice(i, i + rowWidth));
+  }
+  return { inline_keyboard };
 }
