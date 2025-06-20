@@ -33,6 +33,17 @@ async function processUpdates(updates: TelegramUpdate[]) {
     console.log('Processing update:', update);
     
     lastUpdateId = Math.max(lastUpdateId, update.update_id);
+
+    if (update.message && update.message.text && update.message.text.trim() === '/start') {
+      await sendMessage(
+        update.message.chat.id,
+        "👋 Welcome! This is your personal expense tracker bot. Send me an expense in natural language (e.g., 'Lunch 12 USD food'), and I'll add it for you!",
+        undefined,
+        undefined,
+        "Markdown"
+      );
+      continue; // Skip further processing for /start
+    }
     
     if (update.message && update.message.from?.id && update.message.text) {
       console.log('Received message:', update);
@@ -79,7 +90,6 @@ async function startLongPolling() {
   }
 }
 
-// New service: Listen for parsed messages and respond to users
 async function handleParsedMessage(message: {
   messageId: number;
   telegramId: string;
@@ -91,10 +101,10 @@ async function handleParsedMessage(message: {
     const { messageId: msgId, telegramId, chatId, payload, telegramMessageId } = message;
 
     const responseMessage =
-      `Expense added ✅\n` +
-      `*Description:* ${payload.description ?? 'N/A'}\n` +
-      `*Amount:* ${payload.amount ?? 'N/A'}\n` +
-      `*Category:* ${payload.category}`
+      `\n✅ *Expense added* ✅\n\n` +
+      `📝 *Description:* ${payload.description ?? 'N/A'}\n` +
+      `💰 *Amount:* ${payload.amount ? new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(Number(payload.amount)) : 'N/A'}\n` +
+      `🗂️ *Category:* ${payload.category}`
 
     const inlineKeyboard = generateInlineKeyboardMarkup([
       {text: "❌", callback_data: 'remove'}
