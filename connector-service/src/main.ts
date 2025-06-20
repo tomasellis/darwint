@@ -188,6 +188,16 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
     const timeframe = data.replace('report_', '') as 'daily' | 'weekly' | 'monthly' | 'yearly';
 
     const { labels, data: chartData } = await getExpenseDataForUser(message.chat.id, timeframe);
+    const hasData = labels.length > 0 && chartData.some((v) => v > 0);
+    if (!hasData) {
+      await sendMessage(
+        message.chat.id,
+        'No expenses found for this period. Add some expenses to see your report!'
+      );
+      await answerCallbackQuery(callbackQuery.id, 'No expenses found');
+      return;
+    }
+
     const chartBuffer = await generateExpensePieChart(labels, chartData);
 
     await sendPhoto({
