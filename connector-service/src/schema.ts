@@ -13,7 +13,7 @@ export const money = customType<{
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
-  telegramId: text('telegram_id').unique().notNull(),
+  telegramId: integer('telegram_id').unique().notNull(),
 });
 
 export const expenses = pgTable('expenses', {
@@ -31,7 +31,7 @@ export const messageStatusEnum = pgEnum('message_status', ['pending', 'sent', 'f
 export const messagesQueue = pgTable('messages_queue', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').notNull().references(() => users.id),
-  chatId: text('chat_id').notNull(),
+  chatId: integer('chat_id').notNull(),
   telegramMessageId: integer('telegram_message_id').notNull(),
   payload: jsonb('payload').notNull(),
   status: messageStatusEnum('status').notNull().default('pending'),
@@ -45,6 +45,3 @@ export type Expense = typeof expenses.$inferSelect;
 export type NewExpense = typeof expenses.$inferInsert;
 export type MessageQueue = typeof messagesQueue.$inferSelect;
 export type NewMessageQueue = typeof messagesQueue.$inferInsert; 
-
-export const NEW_MESSAGE_CHANNEL = "messages_queue_broadcast_new"
-export const PARSED_MESSAGE_CHANNEL = "messages_queue_broadcast_parsed"
