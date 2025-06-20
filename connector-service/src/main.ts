@@ -1,6 +1,6 @@
-import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardMarkup, deleteMessage, answerCallbackQuery, TelegramCallbackQuery } from './telegramUtils';
-import { db, pool} from './db';
-import { expenses, messagesQueue, users } from './schema';
+import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardMarkup, deleteMessage, answerCallbackQuery, TelegramCallbackQuery } from './telegramUtils.js';
+import { db, pool} from './db.js';
+import { expenses, messagesQueue, users } from './schema.js';
 import { eq } from 'drizzle-orm';
 
 let lastUpdateId = 0;
