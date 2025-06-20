@@ -1,11 +1,11 @@
-import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardMarkup, deleteMessage, answerCallbackQuery, TelegramCallbackQuery } from './telegramUtils.js';
+import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardMarkup, deleteMessage, answerCallbackQuery, TelegramCallbackQuery, generateExpensePieChart, sendPhoto } from './telegramUtils.js';
 import { db, pool} from './db.js';
 import { expenses, messagesQueue, users } from './schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and, gte, sql } from 'drizzle-orm';
 
 let lastUpdateId = 0;
 
-async function insertMessageToQueue(telegramId: string, chatId: string, message: string, telegramMessageId: number) {
+async function insertMessageToQueue(telegramId: number, chatId: number, message: string, telegramMessageId: number) {
   try {
     let user = await db.select().from(users).where(eq(users.telegramId, telegramId)).limit(1);
     
@@ -44,12 +44,33 @@ async function processUpdates(updates: TelegramUpdate[]) {
       );
       continue; // Skip further processing for /start
     }
+
+    if (update.message && update.message.text && update.message.text.trim() === '/report') {
+      const { labels, data } = await getExpenseDataForUser(update.message.chat.id, 'daily');
+      const chartBuffer = await generateExpensePieChart(labels, data);
+
+      // Inline keyboard for timeframe selection
+      // TODO: Add support for inlineKeyboard in sendPhoto (reply_markup)
+      // const inlineKeyboard = generateInlineKeyboardMarkup([
+      //   { text: 'Daily', callback_data: 'report_daily' as any },
+      //   { text: 'Weekly', callback_data: 'report_weekly' as any },
+      //   { text: 'Monthly', callback_data: 'report_monthly' as any },
+      //   { text: 'Yearly', callback_data: 'report_yearly' as any },
+      // ], 2);
+
+      await sendPhoto(
+        update.message.chat.id.toString(),
+        chartBuffer,
+        'Your daily expenses by category'
+      );
+      continue; 
+    }
     
     if (update.message && update.message.from?.id && update.message.text) {
       console.log('Received message:', update);
       await insertMessageToQueue(
-        update.message.from.id.toString(),
-        update.message.chat.id.toString(),
+        update.message.from.id,
+        update.message.chat.id,
         update.message.text,
         update.message.message_id
       );
@@ -92,8 +113,8 @@ async function startLongPolling() {
 
 async function handleParsedMessage(message: {
   messageId: number;
-  telegramId: string;
-  chatId: string;
+  telegramId: number;
+  chatId: number;
   payload: any;
   telegramMessageId: number;
 }) {
@@ -125,7 +146,6 @@ async function handleParsedMessage(message: {
 
 async function startParsedMessageListener() {
   console.log('Starting polling for parsed messages in messages_queue...');
-  const client = await pool.connect();
 
   while (true) {
     try {
@@ -172,6 +192,51 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
 
     await answerCallbackQuery(callbackQuery.id, "Expense deleted!");
   }
+}
+
+function getStartDateForTimeframe(timeframe: 'daily' | 'weekly' | 'monthly' | 'yearly'): Date {
+  const now = new Date();
+  switch (timeframe) {
+    case 'weekly':
+      now.setDate(now.getDate() - 7);
+      break;
+    case 'monthly':
+      now.setMonth(now.getMonth() - 1);
+      break;
+    case 'yearly':
+      now.setFullYear(now.getFullYear() - 1);
+      break;
+    default: // daily
+      now.setHours(0, 0, 0, 0);
+      break;
+  }
+  return now;
+}
+
+export async function getExpenseDataForUser(telegramId: number, timeframe: 'daily' | 'weekly' | 'monthly' | 'yearly') {
+  const user = await db.select().from(users).where(eq(users.telegramId, telegramId)).limit(1);
+  if (!user || user.length === 0) return { labels: [], data: [] };
+
+  const userId = user[0].id;
+  const startDate = getStartDateForTimeframe(timeframe);
+
+  const rows = await db
+    .select({
+      category: expenses.category,
+      total: sql`SUM(${expenses.amount})`.as('total')
+    })
+    .from(expenses)
+    .where(
+      and(
+        eq(expenses.userId, userId),
+        gte(expenses.addedAt, startDate)
+      )
+    )
+    .groupBy(expenses.category);
+
+  const labels = rows.map(r => r.category);
+  const data = rows.map(r => Number(r.total));
+  return { labels, data };
 }
 
 async function main() {

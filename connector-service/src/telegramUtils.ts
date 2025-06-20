@@ -1,4 +1,6 @@
 import 'dotenv/config'
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import type { ChartConfiguration } from 'chart.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API_BASE_URL = 'https://api.telegram.org/bot';
@@ -268,4 +270,34 @@ export function generateInlineKeyboardMarkup(
     inline_keyboard.push(buttons.slice(i, i + rowWidth));
   }
   return { inline_keyboard };
+}
+
+export async function sendPhoto(chatId: string, photoBuffer: Buffer, caption?: string) {
+  const form = new FormData();
+  form.append('chat_id', chatId);
+  form.append('photo', new Blob([photoBuffer]), 'chart.png');
+  if (caption) form.append('caption', caption);
+
+  const res = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendPhoto`, {
+    method: 'POST',
+    body: form,
+  });
+  return res.json();
+}
+
+const width = 400, height = 400;
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
+
+export async function generateExpensePieChart(labels: string[], data: number[]): Promise<Buffer> {
+  const config: ChartConfiguration<'pie', number[], string> = {
+    type: 'pie',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+      }]
+    }
+  };
+  return chartJSNodeCanvas.renderToBuffer(config);
 }
