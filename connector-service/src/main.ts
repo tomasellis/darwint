@@ -2,8 +2,13 @@ import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardM
 import { db, pool} from './db.js';
 import { expenses, messagesQueue, users } from './schema.js';
 import { eq, and, gte, sql } from 'drizzle-orm';
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Chart, registerables } from 'chart.js';
 
 let lastUpdateId = 0;
+
+Chart.register(...registerables, ChartDataLabels);
 
 async function insertMessageToQueue(telegramId: number, chatId: number, message: string, telegramMessageId: number) {
   try {
@@ -42,27 +47,27 @@ async function processUpdates(updates: TelegramUpdate[]) {
         undefined,
         "Markdown"
       );
-      continue; // Skip further processing for /start
+      continue; 
     }
 
     if (update.message && update.message.text && update.message.text.trim() === '/report') {
       const { labels, data } = await getExpenseDataForUser(update.message.chat.id, 'daily');
       const chartBuffer = await generateExpensePieChart(labels, data);
 
-      // Inline keyboard for timeframe selection
-      // TODO: Add support for inlineKeyboard in sendPhoto (reply_markup)
-      // const inlineKeyboard = generateInlineKeyboardMarkup([
-      //   { text: 'Daily', callback_data: 'report_daily' as any },
-      //   { text: 'Weekly', callback_data: 'report_weekly' as any },
-      //   { text: 'Monthly', callback_data: 'report_monthly' as any },
-      //   { text: 'Yearly', callback_data: 'report_yearly' as any },
-      // ], 2);
-
-      await sendPhoto(
-        update.message.chat.id.toString(),
-        chartBuffer,
-        'Your daily expenses by category'
-      );
+      await sendPhoto({
+        chat_id: update.message.chat.id,
+        photoBuffer: chartBuffer,
+        caption: 'Your daily expenses by category',
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Daily', callback_data: 'report_daily' }],
+            [{ text: 'Weekly', callback_data: 'report_weekly' }],
+            [{ text: 'Monthly', callback_data: 'report_monthly' }],
+            [{ text: 'Yearly', callback_data: 'report_yearly' }]
+          ]
+        }
+      });
       continue; 
     }
     
@@ -94,11 +99,9 @@ async function longPollUpdates() {
   } catch (error: any) {
     if (error.message && error.message.includes('409')) {
       console.log('Another bot instance is running, waiting before retry...');
-      // wait before retrying when there's a conflict
       await new Promise(resolve => setTimeout(resolve, 5000));
     } else {
       console.error('Error polling updates:', error);
-      // wait a bit before retrying on other errors
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
@@ -179,17 +182,44 @@ async function startParsedMessageListener() {
 
 async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
   const { message, data } = callbackQuery;
+
+  // Handle timeframe selection
+  if (data && data.startsWith('report_') && message) {
+    const timeframe = data.replace('report_', '') as 'daily' | 'weekly' | 'monthly' | 'yearly';
+    const { labels, data: chartData } = await getExpenseDataForUser(message.chat.id, timeframe);
+    const chartBuffer = await generateExpensePieChart(labels, chartData);
+
+    // Re-send the chart with the same inline keyboard
+    await sendPhoto({
+      chat_id: message.chat.id,
+      photoBuffer: chartBuffer,
+      caption: `Your ${timeframe} expenses by category`,
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Daily', callback_data: 'report_daily' }],
+          [{ text: 'Weekly', callback_data: 'report_weekly' }],
+          [{ text: 'Monthly', callback_data: 'report_monthly' }],
+          [{ text: 'Yearly', callback_data: 'report_yearly' }]
+        ]
+      }
+    });
+
+    await answerCallbackQuery(callbackQuery.id, `Showing ${timeframe} report`);
+    return;
+  }
+
+  // Existing remove logic
   if (data === 'remove' && message) {
     await db.delete(messagesQueue)
       .where(eq(messagesQueue.telegramMessageId, message.message_id));
 
-      if(message.reply_to_message){
-        const deletedExpense = await db.delete(expenses).where(eq(expenses.telegramMessageId, message.reply_to_message.message_id)).returning()
-        console.log("\nDeleted: ", deletedExpense)
-      }
+    if (message.reply_to_message) {
+      const deletedExpense = await db.delete(expenses).where(eq(expenses.telegramMessageId, message.reply_to_message.message_id)).returning();
+      console.log("\nDeleted: ", deletedExpense);
+    }
 
     await deleteMessage(message.chat.id, message.message_id);
-
     await answerCallbackQuery(callbackQuery.id, "Expense deleted!");
   }
 }
@@ -223,7 +253,7 @@ export async function getExpenseDataForUser(telegramId: number, timeframe: 'dail
   const rows = await db
     .select({
       category: expenses.category,
-      total: sql`SUM(${expenses.amount})`.as('total')
+      total: sql`SUM(${expenses.amount}::numeric)`.as('total')
     })
     .from(expenses)
     .where(
@@ -258,3 +288,5 @@ async function main() {
 }
 
 main().catch(console.error);
+
+
