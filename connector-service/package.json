@@ -11,8 +11,8 @@
     "dev:tsx": "tsx src/main.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "drizzle:generate": "drizzle-kit generate:pg --config=drizzle.config.ts",
-    "drizzle:push": "drizzle-kit push:pg --config=drizzle.config.ts",
-    "drizzle:migrate": "drizzle-kit migrate:pg --config=drizzle.config.ts"
+    "drizzle:push": "drizzle-kit push --config=drizzle.config.ts",
+    "drizzle:migrate": "drizzle-kit migrate --config=drizzle.config.ts"
   },
   "keywords": [],
   "author": "",
