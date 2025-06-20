@@ -5,7 +5,7 @@ export default {
   schema: './src/schema.ts',
   out: './drizzle',
   dialect: 'postgresql',
-  ...(process.env.PRODUCTION_DB_URL
+  ...(process.env.NODE_ENV === 'production'
     ? { dbCredentials: { url: process.env.PRODUCTION_DB_URL } }
     : {dbCredentials: {
     host: process.env.DB_HOST || 'localhost',
