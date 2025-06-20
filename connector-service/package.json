@@ -5,7 +5,7 @@
   "main": "dist/main.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/fonts dist/src/fonts",
     "start": "node dist/src/main.js",
     "dev": "tsc && node dist/src/main.js",
     "dev:tsx": "tsx src/main.ts",

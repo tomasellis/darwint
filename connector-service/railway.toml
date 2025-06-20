@@ -17,6 +17,8 @@ numReplicas = 1
 [nixpacks]
 aptPkgs = [
   "fontconfig",
-  "fonts-dejavu-core",
-  "fonts-freefont-ttf"
+  "fonts-dejavu-core",   
+  "fonts-freefont-ttf",   
+  "fonts-noto",          
+  "fonts-noto-color-emoji"  
 ]

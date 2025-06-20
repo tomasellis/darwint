@@ -1,7 +1,9 @@
 import 'dotenv/config'
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import type { ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { registerFont } from 'canvas';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API_BASE_URL = 'https://api.telegram.org/bot';
@@ -9,6 +11,11 @@ const TELEGRAM_API_BASE_URL = 'https://api.telegram.org/bot';
 if (!TELEGRAM_BOT_TOKEN) {
   throw new Error('TELEGRAM_BOT_TOKEN is not set in environment variables');
 }
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+registerFont(path.join(__dirname, 'fonts', 'DejaVuSans.ttf'), { family: 'DejaVu Sans' });
 
 export type TelegramCallbackQueryData = 'remove' | 'accept'
 
@@ -340,8 +347,9 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
           display: true,
           text: `Total: $${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
           font: {
+            family: 'DejaVu Sans',
             size: 32,
-            weight: 'bold',
+            weight: 'bold'
           },
           color: '#222',
           padding: {
@@ -352,8 +360,9 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
         legend: {
           labels: {
             font: {
+              family: 'DejaVu Sans',
               size: 22,
-              weight: 'bold',
+              weight: 'bold'
             },
             padding: 30
           }
@@ -384,25 +393,11 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
           align: 'center',
           anchor: 'center',
           textAlign: 'center',
-          font: (context: any) => {
-            if (context.dataIndex != null && context.dataset.data) {
-              if (context.lineIndex === 0) {
-                return {
-                  weight: 'bold',
-                  size: 28
-                };
-              } else {
-                return {
-                  weight: 'normal',
-                  size: 18
-                };
-              }
-            }
-            return {
-              weight: 'bold',
-              size: 28
-            };
-          }
+          font: (context:any) => ({
+            family: 'DejaVu Sans',
+            weight: context.lineIndex === 0 ? 'bold' : 'normal',
+            size: context.lineIndex === 0 ? 28 : 18
+          })
         }
       }
     }
