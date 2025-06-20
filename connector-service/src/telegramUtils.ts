@@ -307,7 +307,7 @@ export async function sendPhoto({
   return res.json();
 }
 
-const width = 500, height = 500;
+const width = 700, height = 700;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
 export async function generateExpensePieChart(labels: string[], data: number[], threshold:number=8): Promise<Buffer> {
@@ -315,6 +315,7 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#00A86B', '#C0C0C0', '#FFD700', '#8B0000',
     '#008080', '#4682B4', '#FF7F50', '#228B22', '#B22222', '#20B2AA', '#D2691E', '#DC143C', '#7B68EE', '#00CED1',
   ];
+  const total = data.reduce((a, b) => a + b, 0);
   const config = {
     type: 'pie',
     data: {
@@ -322,13 +323,51 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
       datasets: [{
         data,
         backgroundColor: labels.map((_, i) => distinctColors[i % distinctColors.length]),
-        borderColor: '#000', // Black borders
+        borderColor: '#000',
         borderWidth: 2,
       }]
     },
     plugins: [ChartDataLabels],
     options: {
+      layout: {
+        padding: {
+          top: 40,
+          bottom: 40,
+          left: 40,
+          right: 40
+        }
+      },
       plugins: {
+        title: {
+          display: true,
+          text: `Total: $${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+          font: {
+            size: 32,
+            weight: 'bold',
+          },
+          color: '#222',
+          padding: {
+            top: 10,
+            bottom: 10
+          }
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 22,
+              weight: 'bold',
+            },
+            padding: 30
+          }
+        },
+        tooltip: {
+          bodyFont: {
+            size: 22
+          },
+          titleFont: {
+            size: 24
+          }
+        },
         datalabels: {
           display: (context: any) => {
             const value = context.dataset.data[context.dataIndex];
@@ -339,12 +378,32 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
           formatter: (value: number, context: any) => {
             const sum = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
             const percentage = sum ? (value / sum * 100) : 0;
-            return percentage ? percentage.toFixed(1) + '%' : '';
+            if (!percentage) return '';
+            const formattedValue = `$${Number(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            return [`${percentage.toFixed(1)}%`, formattedValue];
           },
           color: '#fff',
-          font: {
-            weight: 'bold' as const,
-            size: 22
+          align: 'center',
+          anchor: 'center',
+          textAlign: 'center',
+          font: (context: any) => {
+            if (context.dataIndex != null && context.dataset.data) {
+              if (context.lineIndex === 0) {
+                return {
+                  weight: 'bold',
+                  size: 28
+                };
+              } else {
+                return {
+                  weight: 'normal',
+                  size: 18
+                };
+              }
+            }
+            return {
+              weight: 'bold',
+              size: 28
+            };
           }
         }
       }

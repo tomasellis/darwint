@@ -10,6 +10,9 @@ let lastUpdateId = 0;
 
 Chart.register(...registerables, ChartDataLabels);
 
+type Timeframe = 'daily' | 'weekly' | 'monthly' | 'yearly';
+const TIMEFRAMES: Timeframe[] = ['daily', 'weekly', 'monthly', 'yearly'];
+
 async function insertMessageToQueue(telegramId: number, chatId: number, message: string, telegramMessageId: number) {
   try {
     let user = await db.select().from(users).where(eq(users.telegramId, telegramId)).limit(1);
@@ -50,25 +53,23 @@ async function processUpdates(updates: TelegramUpdate[]) {
       continue; 
     }
 
-    if (update.message && update.message.text && update.message.text.trim() === '/report') {
-      const { labels, data } = await getExpenseDataForUser(update.message.chat.id, 'daily');
-      const chartBuffer = await generateExpensePieChart(labels, data);
-
-      await sendPhoto({
-        chat_id: update.message.chat.id,
-        photoBuffer: chartBuffer,
-        caption: 'Your daily expenses by category',
-        parse_mode: 'Markdown',
-        reply_markup: {
+    // Handle /report [timeframe]
+    if (update.message && update.message.text && update.message.text.trim().toLowerCase().startsWith('/report')) {
+      await sendMessage(
+        update.message.chat.id,
+        'Please select a timeframe for your report:',
+        undefined,
+        {
           inline_keyboard: [
             [{ text: 'Daily', callback_data: 'report_daily' }],
             [{ text: 'Weekly', callback_data: 'report_weekly' }],
             [{ text: 'Monthly', callback_data: 'report_monthly' }],
             [{ text: 'Yearly', callback_data: 'report_yearly' }]
           ]
-        }
-      });
-      continue; 
+        },
+        'Markdown'
+      );
+      continue;
     }
     
     if (update.message && update.message.from?.id && update.message.text) {
@@ -183,13 +184,12 @@ async function startParsedMessageListener() {
 async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
   const { message, data } = callbackQuery;
 
-  // Handle timeframe selection
   if (data && data.startsWith('report_') && message) {
     const timeframe = data.replace('report_', '') as 'daily' | 'weekly' | 'monthly' | 'yearly';
+
     const { labels, data: chartData } = await getExpenseDataForUser(message.chat.id, timeframe);
     const chartBuffer = await generateExpensePieChart(labels, chartData);
 
-    // Re-send the chart with the same inline keyboard
     await sendPhoto({
       chat_id: message.chat.id,
       photoBuffer: chartBuffer,
