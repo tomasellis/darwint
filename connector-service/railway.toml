@@ -1,0 +1,20 @@
+[build]
+builder = "NIXPACKS"
+watchPatterns = ["/connector-service/**"]
+
+[deploy]
+runtime = "V2"
+numReplicas = 1
+startCommand = "npm run start"
+preDeployCommand = ["npm run build"]
+sleepApplication = false
+multiRegionConfig = {"us-east4-eqdc4a":{"numReplicas":1}}
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[nixpacks]
+aptPkgs = [
+  "fontconfig",
+  "fonts-dejavu-core",
+  "fonts-freefont-ttf"
+]
