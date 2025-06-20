@@ -299,12 +299,12 @@ export async function sendPhoto({
     if (value !== undefined) form.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
   }
 
-  const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+  const res = await (await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendPhoto`, {
     method: 'POST',
     body: form,
-  });
-  console.log({sendPhotoRes: await res.json()})
-  return res.json();
+  })).json();
+  console.log({sendPhotoRes: res})
+  return res
 }
 
 const width = 700, height = 700;
