@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import type { ChartConfiguration } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API_BASE_URL = 'https://api.telegram.org/bot';
@@ -272,32 +273,90 @@ export function generateInlineKeyboardMarkup(
   return { inline_keyboard };
 }
 
-export async function sendPhoto(chatId: string, photoBuffer: Buffer, caption?: string) {
+export async function sendPhoto({
+  chat_id,
+  photoBuffer,
+  caption,
+  parse_mode,
+  reply_markup,
+  ...otherParams
+}: {
+  chat_id: number | string,
+  photoBuffer: Buffer,
+  caption?: string,
+  parse_mode?: string,
+  reply_markup?: any,
+  [key: string]: any // for other optional params
+}) {
   const form = new FormData();
-  form.append('chat_id', chatId);
-  form.append('photo', new Blob([photoBuffer]), 'chart.png');
+  form.append('chat_id', String(chat_id));
+  form.append('photo', new Blob([photoBuffer]), 'photo.png');
   if (caption) form.append('caption', caption);
+  if (parse_mode) form.append('parse_mode', parse_mode);
+  if (reply_markup) form.append('reply_markup', JSON.stringify(reply_markup));
+  // Add any other optional params
+  for (const [key, value] of Object.entries(otherParams)) {
+    if (value !== undefined) form.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+  }
 
-  const res = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendPhoto`, {
+  const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendPhoto`, {
     method: 'POST',
     body: form,
   });
+  console.log({sendPhotoRes: await res.json()})
   return res.json();
 }
 
-const width = 400, height = 400;
+const width = 500, height = 500;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
-export async function generateExpensePieChart(labels: string[], data: number[]): Promise<Buffer> {
-  const config: ChartConfiguration<'pie', number[], string> = {
+export async function generateExpensePieChart(labels: string[], data: number[], threshold:number=8): Promise<Buffer> {
+  const distinctColors = [
+    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#00A86B', '#C0C0C0', '#FFD700', '#8B0000',
+    '#008080', '#4682B4', '#FF7F50', '#228B22', '#B22222', '#20B2AA', '#D2691E', '#DC143C', '#7B68EE', '#00CED1',
+  ];
+  const config = {
     type: 'pie',
     data: {
       labels,
       datasets: [{
         data,
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+        backgroundColor: labels.map((_, i) => distinctColors[i % distinctColors.length]),
+        borderColor: '#000', // Black borders
+        borderWidth: 2,
       }]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      plugins: {
+        datalabels: {
+          display: (context: any) => {
+            const value = context.dataset.data[context.dataIndex];
+            const sum = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = sum ? (value / sum * 100) : 0;
+            return percentage >= threshold; 
+          },
+          formatter: (value: number, context: any) => {
+            const sum = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = sum ? (value / sum * 100) : 0;
+            return percentage ? percentage.toFixed(1) + '%' : '';
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold' as const,
+            size: 22
+          }
+        }
+      }
     }
   };
-  return chartJSNodeCanvas.renderToBuffer(config);
+  return await chartJSNodeCanvas.renderToBuffer(config as any);
+}
+
+function printChartToConsole(buffer: Buffer) {
+  const base64 = buffer.toString('base64');
+  const dataUrl = `data:image/png;base64,${base64}`;
+  console.log('\n--- Chart Data URL (copy and open in browser) ---\n');
+  console.log(dataUrl);
+  console.log('\n--- End Chart Data URL ---\n');
 }
