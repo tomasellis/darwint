@@ -323,8 +323,6 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
       datasets: [{
         data,
         backgroundColor: labels.map((_, i) => distinctColors[i % distinctColors.length]),
-        borderColor: '#000',
-        borderWidth: 2,
       }]
     },
     plugins: [ChartDataLabels],
