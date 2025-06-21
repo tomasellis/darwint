@@ -13,3 +13,12 @@ restartPolicyMaxRetries = 10
 
 [deploy.multiRegionConfig."us-east4-eqdc4a"]
 numReplicas = 1
+
+[nixpacks]
+aptPkgs = [
+  "fontconfig",
+  "fonts-dejavu-core",   
+  "fonts-freefont-ttf",   
+  "fonts-noto",          
+  "fonts-noto-color-emoji"  
+]
