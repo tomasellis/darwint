@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 from parser import ExpenseParser
 import json
 
-dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-load_dotenv(dotenv_path)
+
+load_dotenv()
 
 DB_PARAMS = {
     "dbname": os.getenv("POSTGRES_DB"),
