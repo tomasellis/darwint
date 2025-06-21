@@ -141,17 +141,10 @@ async function makeTelegramRequest<T>(
     console.log('Request params:', params);
     
     const response = await fetch(url, options);
-    const responseText = await response.text();
+    const data: TelegramApiResponse<T> = await response.json();
     
     console.log(`Response status: ${response.status}`);
-    console.log(`Response body: ${responseText}`);
-    
-    let data: TelegramApiResponse<T>;
-    try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      throw new Error(`Failed to parse response as JSON: ${responseText}`);
-    }
+    console.log(`Response body:`, {data});
     
     if (!data.ok) {
       throw new Error(`Telegram API error: ${data.description} (${data.error_code})`);

@@ -91,7 +91,7 @@ async function processUpdates(updates: TelegramUpdate[]) {
 
 async function longPollUpdates() {
   try {
-    const updates = await getUpdates(lastUpdateId + 1, undefined, 30);
+    const updates = await getUpdates(lastUpdateId + 1, undefined, 30, []);
     
     if (updates.length > 0) {
       console.log(`Received ${updates.length} updates`);
