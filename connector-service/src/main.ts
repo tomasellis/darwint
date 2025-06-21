@@ -205,14 +205,14 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
       photoBuffer: chartBuffer,
       caption: `Your ${timeframe} expenses by category`,
       parse_mode: 'Markdown',
-      reply_markup: {
+      /* reply_markup: {
         inline_keyboard: [
           [{ text: 'Daily', callback_data: 'report_daily' }],
           [{ text: 'Weekly', callback_data: 'report_weekly' }],
           [{ text: 'Monthly', callback_data: 'report_monthly' }],
           [{ text: 'Yearly', callback_data: 'report_yearly' }]
         ]
-      }
+      } */
     });
 
     await answerCallbackQuery(callbackQuery.id, `Showing ${timeframe} report`);
