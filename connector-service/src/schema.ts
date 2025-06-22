@@ -39,9 +39,17 @@ export const messagesQueue = pgTable('messages_queue', {
   processedAt: timestamp('processed_at'),
 });
 
+export const telegramUpdates = pgTable('telegram_updates', {
+  id: serial('id').primaryKey(),
+  telegramUpdateId: integer('telegram_update_id').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Expense = typeof expenses.$inferSelect;
 export type NewExpense = typeof expenses.$inferInsert;
 export type MessageQueue = typeof messagesQueue.$inferSelect;
 export type NewMessageQueue = typeof messagesQueue.$inferInsert; 
+export type TelegramUpdate = typeof telegramUpdates.$inferSelect; 
+export type NewTelegramUpdate = typeof telegramUpdates.$inferInsert; 

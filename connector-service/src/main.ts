@@ -1,6 +1,6 @@
 import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardMarkup, deleteMessage, answerCallbackQuery, TelegramCallbackQuery, generateExpensePieChart, sendPhoto } from './telegramUtils.js';
 import { db, pool} from './db.js';
-import { expenses, messagesQueue, users } from './schema.js';
+import { expenses, messagesQueue, users, telegramUpdates } from './schema.js';
 import { eq, and, gte, sql } from 'drizzle-orm';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -13,6 +13,48 @@ Chart.register(...registerables, ChartDataLabels);
 type Timeframe = 'daily' | 'weekly' | 'monthly' | 'yearly';
 const TIMEFRAMES: Timeframe[] = ['daily', 'weekly', 'monthly', 'yearly'];
 
+async function getLastUpdateIdFromDB(): Promise<number> {
+  try {
+    const result = await db
+      .select({ telegramUpdateId: telegramUpdates.telegramUpdateId })
+      .from(telegramUpdates)
+      .orderBy(telegramUpdates.telegramUpdateId)
+      .limit(1);
+    
+    if (result.length > 0) {
+      return result[0].telegramUpdateId;
+    }
+    return 1; 
+  } catch (error) {
+    console.error('Error getting last update ID from DB:', error);
+    return 1;
+  }
+}
+
+async function updateLastUpdateIdInDB(updateId: number): Promise<void> {
+  try {
+    await db.transaction(async (tx) => {
+      const existingRecord = await tx
+        .select({ id: telegramUpdates.id })
+        .from(telegramUpdates)
+        .limit(1);
+      
+      if (existingRecord.length > 0) {
+        await tx
+          .update(telegramUpdates)
+          .set({ telegramUpdateId: updateId })
+          .where(eq(telegramUpdates.id, existingRecord[0].id));
+      } else {
+        await tx.insert(telegramUpdates).values({ telegramUpdateId: updateId });
+      }
+    });
+    
+    console.log(`✅ Updated last update ID in DB: ${updateId}`);
+  } catch (error) {
+    console.error('Error updating last update ID in DB:', error);
+  }
+}
+
 async function insertMessageToQueue(telegramId: number, chatId: number, message: string, telegramMessageId: number) {
   try {
     let user = await db.select().from(users).where(eq(users.telegramId, telegramId)).limit(1);
@@ -20,6 +62,22 @@ async function insertMessageToQueue(telegramId: number, chatId: number, message:
     if (user.length === 0) {
       const newUser = await db.insert(users).values({ telegramId }).returning();
       user = newUser;
+    }
+    
+    const existingMessage = await db
+      .select({ id: messagesQueue.id })
+      .from(messagesQueue)
+      .where(
+        and(
+          eq(messagesQueue.userId, user[0].id),
+          eq(messagesQueue.telegramMessageId, telegramMessageId)
+        )
+      )
+      .limit(1);
+    
+    if (existingMessage.length > 0) {
+      console.log(`Message already exists in queue for user ${telegramId}, message ID ${telegramMessageId}`);
+      return;
     }
     
     await db.insert(messagesQueue).values({
@@ -42,6 +100,7 @@ async function processUpdates(updates: TelegramUpdate[]) {
     
     lastUpdateId = Math.max(lastUpdateId, update.update_id);
 
+    // Handle /start
     if (update.message && update.message.text && update.message.text.trim() === '/start') {
       await sendMessage(
         update.message.chat.id,
@@ -50,10 +109,11 @@ async function processUpdates(updates: TelegramUpdate[]) {
         undefined,
         "Markdown"
       );
+      await updateLastUpdateIdInDB(lastUpdateId);
       continue; 
     }
 
-    // Handle /report [timeframe]
+    // Handle /report
     if (update.message && update.message.text && update.message.text.trim().toLowerCase().startsWith('/report')) {
       await sendMessage(
         update.message.chat.id,
@@ -69,9 +129,11 @@ async function processUpdates(updates: TelegramUpdate[]) {
         },
         'Markdown'
       );
+      await updateLastUpdateIdInDB(lastUpdateId);
       continue;
     }
     
+    // handle any other text
     if (update.message && update.message.from?.id && update.message.text) {
       console.log('Received message:', update);
       await insertMessageToQueue(
@@ -80,23 +142,31 @@ async function processUpdates(updates: TelegramUpdate[]) {
         update.message.text,
         update.message.message_id
       );
+      await updateLastUpdateIdInDB(lastUpdateId);
     }
     
+    // Handle callback
     if (update.callback_query) {
       console.log('Received callback query:', update.callback_query);
       await handleCallbackQuery(update.callback_query);
+      await updateLastUpdateIdInDB(lastUpdateId);
     }
   }
 }
 
 async function longPollUpdates() {
   try {
-    const updates = await getUpdates(lastUpdateId + 1, undefined, 30, []);
+    const updates = await getUpdates(lastUpdateId, undefined, 30, []);
     
     if (updates.length > 0) {
       console.log(`Received ${updates.length} updates`);
       await processUpdates(updates);
+    } else {
+      await updateLastUpdateIdInDB(lastUpdateId);
     }
+    
+    lastUpdateId = await getLastUpdateIdFromDB() + 1;
+    
   } catch (error: any) {
     if (error.message && error.message.includes('409')) {
       console.log('Another bot instance is running, waiting before retry...');
@@ -110,8 +180,12 @@ async function longPollUpdates() {
 
 async function startLongPolling() {
   console.log('Starting long polling for updates...');
+  
+  lastUpdateId = await getLastUpdateIdFromDB();
+  console.log(`Initialized lastUpdateId from DB: ${lastUpdateId}`);
+  
   while (true) {
-    await longPollUpdates();
+      await longPollUpdates();
   }
 }
 
@@ -181,6 +255,7 @@ async function startParsedMessageListener() {
   }
 }
 
+// Telegram callback 
 async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
   const { message, data } = callbackQuery;
 
@@ -219,7 +294,7 @@ async function handleCallbackQuery(callbackQuery: TelegramCallbackQuery) {
     return;
   }
 
-  // Existing remove logic
+  // User pressed X button to remove expense
   if (data === 'remove' && message) {
     await db.delete(messagesQueue)
       .where(eq(messagesQueue.telegramMessageId, message.message_id));
