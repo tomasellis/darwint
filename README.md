@@ -150,6 +150,16 @@ The Python parser service, must be run in another terminal:
 ```bash
 cd bot-service
 ```
+If you are an **uv user**, run:
+```bash
+uv sync
+```
+Then feel free to activate that .venv/bin/activate or just use ``uv run python main.py`` to use the same Python version I developed with.
+```bash
+uv run python main.py
+```
+or the classic Python way:
+
 ```bash
 python -m venv venv
 ```
