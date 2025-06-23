@@ -34,12 +34,27 @@ Finally the parsing service. I decided on building a messages queue in my databa
 
 I have two main heavy duty queries, one for the messages queue(where I'm mostly interested in a message's status) and one for the user's report(where my main focus is the user's expenses for a certain window of time). I decided to create an index for each of these queries and speed up look-up.
 
+
 # Setup
+
+### Requirements
+
+```bash
+Python 3.11
+
+Node LTS 22.16.0
+
+NPM 11.4.2
+
+Docker or your own Database URL
+```
 
 Clone the repo:
 
 ```bash
 git clone https://github.com/tomasellis/darwint.git
+```
+```bash
 cd darwint
 ```
 
@@ -48,17 +63,6 @@ There's a directory for each service. You need to run each one separately. Both 
 Create a .env inside /darwint:
 
 .env:
-
-```bash
-TELEGRAM_BOT_TOKEN=******************
-OPENAI_API_KEY=**********************
-
-LOCAL_DB_URL=postgresql://postgres:postgres@localhost:5432/darwint  
-
-NODE_ENV=development
-```
-
-or
 
 ```bash
 TELEGRAM_BOT_TOKEN=******************
@@ -73,7 +77,11 @@ POSTGRES_HOST=localhost
 NODE_ENV=development
 ```
 
-You must have a Postgresql database running. After setting up the .env, with Docker running in the background. Run:
+You must have a Postgresql database running. 
+
+Feel free to skip this if you have your DB url already.
+
+After setting up the .env, with Docker running in the background. Run:
 
 ```bash 
 docker-compose up -d
@@ -83,7 +91,11 @@ Finally the services, the Python parser service:
 
 ```bash
 cd bot-service
+```
+```bash
 pip install -r requirements.txt
+```
+```bash
 python main.py
 ```
 
@@ -91,6 +103,10 @@ In another terminal, run the Node bridge service:
 
 ```bash
 cd connector-service
+```
+```bash
 npm install
-npm run start
+```
+```bash
+npm run dev
 ```
