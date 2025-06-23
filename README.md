@@ -3,8 +3,31 @@
 </p>
 
 # Description
-DarwintBot is a Telegram bot that uses both a Python and a Node service to keep an account of the user's expenses.
+[DarwintBot](https://t.me/DarwintBot) is a Telegram bot that uses both a Python and a Node service to keep an account of the user's expenses.
+- Features an LLM assisted parser to check if the messages received are expenses or not.
+- A command to get back {daily, weekly, monthly, yearly} total of expenses separated by categories and displayed in a pie chart.
 
+There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the production one, it must work without hicups. There's also [dev-DarwintBot](https://t.me/DevDarwintBot) that may or may not be up and running, which is used for development.
+
+# Using the Bot
+After following the previous setup steps, the bot is running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
+
+The bot has 2 main features:
+
+### Parsing expenses
+Send it a message like: 10USD in Bananas or 200 lunch and it will reply with the added product. This way the user confirms that the expense was added. These replies also come with an "X" button that can be used to delete said expense if there was a mistake in the parsing.
+
+<p align="center">
+  <img width="479" alt="image" src="https://github.com/user-attachments/assets/15a63b6e-e79e-4b0c-b659-3864b8f0bf01" />
+</p>
+
+
+### /report
+Is one of the two commands the bot has, the first being **/start** which is just the welcome message. /report comes back with a series of buttons that the user can click to get back a pie chart with their saved expenses(daily, weekly, monthly or yearly).
+
+<p align="center">
+  <img width="351" alt="image" src="https://github.com/user-attachments/assets/5457894b-07c1-431a-abb0-3081ca449d0d" />
+</p>
 
 
 # Process
@@ -151,24 +174,6 @@ sleeping...
 sleeping...
 ```
 
-# Using the bot
-After following the previous setup steps, the bot is running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
 
-The bot has 2 main features:
-
-### Parsing expenses
-Send it a message like: 10USD in Bananas or 200 lunch and it will reply with the added product. This way the user confirms that the expense was added. These replies also come with an "X" button that can be used to delete said expense if there was a mistake in the parsing.
-
-<p align="center">
-  <img width="479" alt="image" src="https://github.com/user-attachments/assets/15a63b6e-e79e-4b0c-b659-3864b8f0bf01" />
-</p>
-
-
-### /report
-Is one of the two commands the bot has, the first being **/start** which is just the welcome message. /report comes back with a series of buttons that the user can click to get back a pie chart with their saved expenses(daily, weekly, monthly or yearly).
-
-<p align="center">
-  <img width="351" alt="image" src="https://github.com/user-attachments/assets/5457894b-07c1-431a-abb0-3081ca449d0d" />
-</p>
 
 
