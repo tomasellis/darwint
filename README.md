@@ -38,8 +38,10 @@ I have two main heavy duty queries, one for the messages queue(where I'm mostly 
 
 Clone the repo:
 
-> git clone https://github.com/tomasellis/darwint.git
-> cd darwint
+```bash
+git clone https://github.com/tomasellis/darwint.git
+cd darwint
+```
 
 There's a directory for each service. You need to run each one separately. Both of them use the same .env that should be placed in the root folder.
 
@@ -47,6 +49,7 @@ Create a .env inside /darwint:
 
 .env:
 
+```bash
 TELEGRAM_BOT_TOKEN=******************
 OPENAI_API_KEY=**********************
 
@@ -66,18 +69,26 @@ POSTGRES_PORT=5432
 POSTGRES_HOST=localhost
 
 NODE_ENV=development
+```
+
 You must have a Postgresql database running. After setting up the .env, with Docker running in the background. Run:
 
-> docker-compose up -d
+```bash 
+docker-compose up -d
+```
 
 Finally the services, the Python parser service:
 
-> cd bot-service
-> pip install -r requirements.txt
-> python main.py
+```bash
+cd bot-service
+pip install -r requirements.txt
+python main.py
+```
 
 In another terminal, run the Node bridge service:
 
-> cd connector-service
-> npm install
-> npm run start
+```bash
+cd connector-service
+npm install
+npm run start
+```
