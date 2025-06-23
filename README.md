@@ -3,32 +3,36 @@
 </p>
 
 # Description
+
 [DarwintBot](https://t.me/DarwintBot) is a Telegram bot that uses both a Python and a Node service to keep an account of the user's expenses.
+
 - Features an LLM assisted parser to check if the messages received are expenses or not.
 - A command to get back {daily, weekly, monthly, yearly} total of expenses separated by categories and displayed in a pie chart.
+- A whitelist. Should the database table *whitelist* have any user, then only users in the whitelist can interact with the bot. If it's empty, then every user can interact with the bot. I made this decision to keep theh production bot working.
 
 There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the production one, it must work without hicups. There's also [dev-DarwintBot](https://t.me/DevDarwintBot) that may or may not be up and running, which is used for development.
 
 # Using the Bot
+
 After following the previous setup steps, the bot is running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
 
 The bot has 2 main features:
 
 ### Parsing expenses
+
 Send it a message like: 10USD in Bananas or 200 lunch and it will reply with the added product. This way the user confirms that the expense was added. These replies also come with an "X" button that can be used to delete said expense if there was a mistake in the parsing.
 
 <p align="center">
   <img width="479" alt="image" src="https://github.com/user-attachments/assets/15a63b6e-e79e-4b0c-b659-3864b8f0bf01" />
 </p>
 
-
 ### /report
+
 Is one of the two commands the bot has, the first being **/start** which is just the welcome message. /report comes back with a series of buttons that the user can click to get back a pie chart with their saved expenses(daily, weekly, monthly or yearly).
 
 <p align="center">
   <img width="351" alt="image" src="https://github.com/user-attachments/assets/5457894b-07c1-431a-abb0-3081ca449d0d" />
 </p>
-
 
 # Process
 
@@ -66,7 +70,6 @@ Finally the parsing service. I decided on building a messages queue in my databa
 
 I have two main heavy duty queries, one for the messages queue(where I'm mostly interested in a message's status) and one for the user's report(where my main focus is the user's expenses for a certain window of time). I decided to create an index for each of these queries and speed up look-up.
 
-
 # Setup
 
 ### Requirements
@@ -86,6 +89,7 @@ Clone the repo:
 ```bash
 git clone https://github.com/tomasellis/darwint.git
 ```
+
 ```bash
 cd darwint
 ```
@@ -110,13 +114,13 @@ POSTGRES_HOST=localhost
 NODE_ENV=development
 ```
 
-You must have a Postgresql database running. 
+You must have a Postgresql database running.
 
 Feel free to skip this if you have your DB url already.
 
 After setting up the .env, with Docker running in the background. Run:
 
-```bash 
+```bash
 docker-compose up -d
 ```
 
@@ -125,6 +129,7 @@ Finally the services, run the Node bridge service:
 ```bash
 cd connector-service
 ```
+
 ```bash
 npm install
 ```
@@ -134,6 +139,7 @@ Then we setup our Database:
 ```bash
 npm run drizzle:push
 ```
+
 and the service:
 
 ```bash
@@ -141,6 +147,7 @@ npm run dev
 ```
 
 It should start, get the bot's data and start sleeping:
+
 ```bash
 sleeping...
 sleeping...
@@ -152,15 +159,19 @@ The Python parser service, must be run in another terminal:
 ```bash
 cd bot-service
 ```
+
 ```bash
 python -m venv venv
 ```
+
 ```bash
 source venv/bin/activate  # or .\venv\Scripts\activate on windows
 ```
+
 ```bash
 pip install -r requirements.txt
 ```
+
 ```bash
 python main.py
 ```
@@ -173,7 +184,3 @@ sleeping...
 sleeping...
 sleeping...
 ```
-
-
-
-
