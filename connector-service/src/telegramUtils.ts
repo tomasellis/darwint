@@ -1,15 +1,12 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { registerFont } from 'canvas';
+import { fileURLToPath } from 'url';
 
 import path from 'path';
-import { fileURLToPath } from 'url';
+
 import dotenv from 'dotenv';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: '../.env' });
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API_BASE_URL = process.env.TELEGRAM_API_BASE_URL;
@@ -17,6 +14,9 @@ const TELEGRAM_API_BASE_URL = process.env.TELEGRAM_API_BASE_URL;
 if (!TELEGRAM_BOT_TOKEN) {
 	throw new Error('TELEGRAM_BOT_TOKEN is not set in environment variables');
 }
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 registerFont(path.join(__dirname, 'fonts', 'DejaVuSans.ttf'), { family: 'DejaVu Sans' });
 
