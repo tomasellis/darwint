@@ -147,7 +147,7 @@ and the service:
 npm run dev
 ```
 
-It should start, get the bot's data and start sleeping:
+It should start, get the bot's data and go to sleep:
 
 ```bash
 sleeping...
