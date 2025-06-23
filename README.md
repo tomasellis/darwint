@@ -16,14 +16,14 @@ There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the
 
 After following the previous setup steps, the bot is running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
 
-The bot has 2 main features:
+The bot has 3 main features:
 
-### Parsing expenses
+### Parsing expenses and roasting!
 
-Send it a message like: 10USD in Bananas or 200 lunch and it will reply with the added product. This way the user confirms that the expense was added. These replies also come with an "X" button that can be used to delete said expense if there was a mistake in the parsing.
+Send it a message like: 10USD in Bananas or 200 lunch and it will reply with the added product. This way the user confirms that the expense was added. These replies also come with an "X" button that can be used to delete said expense if there was a mistake in the parsing. And most important of all, with a 0.2 temperature the bot tries to roast the users expenses!
 
 <p align="center">
-  <img width="479" alt="image" src="https://github.com/user-attachments/assets/15a63b6e-e79e-4b0c-b659-3864b8f0bf01" />
+  <img width="486" alt="image" src="https://github.com/user-attachments/assets/6f555aa2-5e3b-474a-be2d-83cbf1d1b565" />
 </p>
 
 ### /report
