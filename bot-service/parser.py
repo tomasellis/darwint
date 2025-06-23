@@ -67,7 +67,7 @@ Other: Personal transfers, gifts, donations, anything not fitting above categori
 
 Key Rules:
 
-Context: Check how the currency is being used. Be lax on the expenses you allow, after all the user is talking with a financial assistant so they most likely are talking about expenses.
+Context: Be lax on the expenses you allow, after all the user is talking with a financial assistant so they most likely are talking about expenses. If there's a number and a possible product name, believe that it's what the user wants to add.
 Ambiguity Resolution: Use contextual reasoning. If a human would reasonably understand the expense despite incomplete information, extract it.
 First Expense Only: If multiple expenses mentioned, extract only the first one.
 Exact Categories: Never create new categories or modify existing names.
