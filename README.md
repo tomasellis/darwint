@@ -10,7 +10,7 @@
 - A command to get back {daily, weekly, monthly, yearly} total of expenses separated by categories and displayed in a pie chart.
 - A whitelist. Should the database table *whitelist* have any user, then only users in the whitelist can interact with the bot. If it's empty, then every user can interact with the bot. I made this decision to keep theh production bot working.
 
-There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the production one, it must work without hicups. There's also [dev-DarwintBot](https://t.me/DevDarwintBot) that may or may not be up and running, which is used for development.
+There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the production one, it must work without hiccups. There's also [dev-DarwintBot](https://t.me/DevDarwintBot) that may or may not be up and running, which is used for development.
 
 # Using the Bot
 
@@ -54,7 +54,7 @@ I have no way of knowing if the bot's response to a message was received by the 
 
 [With webhooks I can let Telegram's server handle the SEND message request.](https://core.telegram.org/bots/faq#how-can-i-make-requests-in-response-to-updates) After I receive a webhook, I can send a response with a payload including the message response from the bot. Then I only have to worry about getting dupes in my backend. If anything happens midway through Telegram's webhook request, Telegram retries it. I only have to check if I have already parsed the message, if I haven't, I parse it and send it back as a response. If I do have it, I send back the parsed payload. Telegram handles the rest and this way I'm sending only one message to the user.
 
-#### Hicup:
+#### Hiccup:
 
 *While testing the webhooks approach, the response time was weirdly higher than when polling the API. I reverted back to polling as I would need a bit more time to find out why this is happening. It would've been my preferred approach but the response time with polling is good enough although I'm leaving the exactly one message idea behind and sending more than one until I get an OK from the API.*
 
