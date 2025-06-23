@@ -97,8 +97,6 @@ async function insertMessageToQueue(telegramId: number, chatId: number, message:
 async function processUpdates(updates: TelegramUpdate[]) {
   for (const update of updates) {
     console.log('Processing update:', update);
-    
-    lastUpdateId = Math.max(lastUpdateId, update.update_id);
 
     // Handle /start
     if (update.message && update.message.text && update.message.text.trim() === '/start') {
@@ -109,7 +107,6 @@ async function processUpdates(updates: TelegramUpdate[]) {
         undefined,
         "Markdown"
       );
-      await updateLastUpdateIdInDB(lastUpdateId);
       continue; 
     }
 
@@ -129,7 +126,6 @@ async function processUpdates(updates: TelegramUpdate[]) {
         },
         'Markdown'
       );
-      await updateLastUpdateIdInDB(lastUpdateId);
       continue;
     }
     
@@ -142,14 +138,12 @@ async function processUpdates(updates: TelegramUpdate[]) {
         update.message.text,
         update.message.message_id
       );
-      await updateLastUpdateIdInDB(lastUpdateId);
     }
     
     // Handle callback
     if (update.callback_query) {
       console.log('Received callback query:', update.callback_query);
       await handleCallbackQuery(update.callback_query);
-      await updateLastUpdateIdInDB(lastUpdateId);
     }
   }
 }
@@ -161,11 +155,11 @@ async function longPollUpdates() {
     if (updates.length > 0) {
       console.log(`Received ${updates.length} updates`);
       await processUpdates(updates);
-    } else {
+      // Update lastUpdateId to the highest update_id we've seen plus one
+      const maxUpdateId = Math.max(...updates.map(u => u.update_id));
+      lastUpdateId = maxUpdateId + 1;
       await updateLastUpdateIdInDB(lastUpdateId);
     }
-    
-    lastUpdateId = await getLastUpdateIdFromDB() + 1;
     
   } catch (error: any) {
     if (error.message && error.message.includes('409')) {
