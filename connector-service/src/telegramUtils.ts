@@ -12,10 +12,14 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_API_BASE_URL = 'https://api.telegram.org/bot';
+const TELEGRAM_API_BASE_URL = process.env.TELEGRAM_API_BASE_URL;
 
 if (!TELEGRAM_BOT_TOKEN) {
   throw new Error('TELEGRAM_BOT_TOKEN is not set in environment variables');
+}
+
+if (!TELEGRAM_API_BASE_URL) {
+  throw new Error('TELEGRAM_API_BASE_URL is not set in environment variables');
 }
 
 registerFont(path.join(__dirname, 'fonts', 'DejaVuSans.ttf'), { family: 'DejaVu Sans' });
@@ -124,24 +128,30 @@ export interface SendMessageResponse {
  */
 async function makeTelegramRequest<T>(
   method: string,
-  params?: Record<string, any>
+  params?: Record<string, any> | FormData
 ): Promise<T> {
   const url = `${TELEGRAM_API_BASE_URL}${TELEGRAM_BOT_TOKEN}/${method}`;
   
   const options: RequestInit = {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
   };
 
   if (params) {
-    options.body = JSON.stringify(params);
+    if (params instanceof FormData) {
+      options.body = params;
+    } else {
+      options.headers = {
+        'Content-Type': 'application/json',
+      };
+      options.body = JSON.stringify(params);
+    }
   }
 
   try {
     console.log(`Making request to: ${method}`);
-    console.log('Request params:', params);
+    if (!(params instanceof FormData)) {
+      console.log('Request params:', params);
+    }
     
     const response = await fetch(url, options);
     const data: TelegramApiResponse<T> = await response.json();
@@ -289,7 +299,7 @@ export async function sendPhoto({
   caption?: string,
   parse_mode?: string,
   reply_markup?: any,
-  [key: string]: any // for other optional params
+  [key: string]: any 
 }) {
   const form = new FormData();
   form.append('chat_id', String(chat_id));
@@ -297,17 +307,11 @@ export async function sendPhoto({
   if (caption) form.append('caption', caption);
   if (parse_mode) form.append('parse_mode', parse_mode);
   if (reply_markup) form.append('reply_markup', JSON.stringify(reply_markup));
-  // Add any other optional params
   for (const [key, value] of Object.entries(otherParams)) {
     if (value !== undefined) form.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
   }
 
-  const res = await (await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-    method: 'POST',
-    body: form,
-  })).json();
-  console.log({sendPhotoRes: res})
-  return res
+  return makeTelegramRequest('sendPhoto', form);
 }
 
 const width = 700, height = 700;
@@ -399,12 +403,4 @@ export async function generateExpensePieChart(labels: string[], data: number[], 
     }
   };
   return await chartJSNodeCanvas.renderToBuffer(config as any);
-}
-
-function printChartToConsole(buffer: Buffer) {
-  const base64 = buffer.toString('base64');
-  const dataUrl = `data:image/png;base64,${base64}`;
-  console.log('\n--- Chart Data URL (copy and open in browser) ---\n');
-  console.log(dataUrl);
-  console.log('\n--- End Chart Data URL ---\n');
 }
