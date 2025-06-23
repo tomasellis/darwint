@@ -56,9 +56,11 @@ OPENAI_API_KEY=**********************
 LOCAL_DB_URL=postgresql://postgres:postgres@localhost:5432/darwint  
 
 NODE_ENV=development
+```
 
-###########################  OR  ###############################
+or
 
+```bash
 TELEGRAM_BOT_TOKEN=******************
 OPENAI_API_KEY=**********************
 
