@@ -1,39 +1,39 @@
 {
-  "name": "service",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/main.js",
-  "type": "module",
-  "scripts": {
-    "build": "tsc && cp -r src/fonts dist/src/fonts",
-    "start": "node dist/src/main.js",
-    "dev:build": "tsc && node dist/src/main.js",
-    "dev": "tsx watch src/main.ts",
-    "dev:seed": "tsx src/seed.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "drizzle:generate": "drizzle-kit generate --config=drizzle.config.ts",
-    "drizzle:push": "drizzle-kit push --config=drizzle.config.ts",
-    "drizzle:migrate": "drizzle-kit migrate --config=drizzle.config.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "volta": {
-    "node": "22.16.0",
-    "npm": "11.4.2"
-  },
-  "dependencies": {
-    "chartjs-node-canvas": "^5.0.0",
-    "chartjs-plugin-datalabels": "^2.2.0",
-    "dotenv": "^16.3.1",
-    "drizzle-orm": "^0.44.2",
-    "pg": "^8.11.3",
-    "typescript": "^5.8.3"
-  },
-  "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@types/pg": "^8.10.9",
-    "drizzle-kit": "^0.31.1",
-    "tsx": "^4.20.3"
-  }
+	"name": "service",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/main.js",
+	"type": "module",
+	"scripts": {
+		"build": "tsc && cp -r src/fonts dist/src/fonts",
+		"start": "node dist/src/main.js",
+		"dev:build": "tsc && node dist/src/main.js",
+		"dev": "tsx watch src/main.ts",
+		"dev:seed": "tsx src/seed.ts",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"drizzle:generate": "drizzle-kit generate --config=drizzle.config.ts",
+		"drizzle:push": "drizzle-kit push --config=drizzle.config.ts",
+		"drizzle:migrate": "drizzle-kit migrate --config=drizzle.config.ts"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"volta": {
+		"node": "22.16.0",
+		"npm": "11.4.2"
+	},
+	"dependencies": {
+		"chartjs-node-canvas": "^5.0.0",
+		"chartjs-plugin-datalabels": "^2.2.0",
+		"dotenv": "^16.3.1",
+		"drizzle-orm": "^0.44.2",
+		"pg": "^8.11.3",
+		"typescript": "^5.8.3"
+	},
+	"devDependencies": {
+		"@types/node": "^20.10.0",
+		"@types/pg": "^8.10.9",
+		"drizzle-kit": "^0.31.1",
+		"tsx": "^4.20.3"
+	}
 }
