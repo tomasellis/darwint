@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export default {
-	schema: './src/schema.ts',
+	schema: './src/db/schema.ts',
 	out: './drizzle',
 	dialect: 'postgresql',
 	...(process.env.NODE_ENV === 'production'

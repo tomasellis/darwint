@@ -1,8 +1,8 @@
 import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardMarkup, deleteMessage, answerCallbackQuery, TelegramCallbackQuery, generateExpensePieChart, sendPhoto } from './telegramUtils.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Chart, registerables } from 'chart.js';
-import { getLastTelegramUpdateIdQuery, getUserByTelegramIdQuery, getExistingMessageInQueueQuery, getExpenseDataForUserQuery, getNextParsedMessageQuery } from './queries.js';
-import { deleteExpenseByTelegramMessageIdMutation, deleteMessageFromQueueMutation, insertUserMutation, setLastTelegramUpdateIdMutation, insertMessageToQueueMutation, updateMessageQueueStatusMutation } from './mutations.js';
+import { getLastTelegramUpdateIdQuery, getUserByTelegramIdQuery, getExistingMessageInQueueQuery, getExpenseDataForUserQuery, getNextParsedMessageQuery } from './db/queries.js';
+import { deleteExpenseByTelegramMessageIdMutation, deleteMessageFromQueueMutation, insertUserMutation, setLastTelegramUpdateIdMutation, insertMessageToQueueMutation, updateMessageQueueStatusMutation } from './db/mutations.js';
 
 let lastUpdateId = 0;
 

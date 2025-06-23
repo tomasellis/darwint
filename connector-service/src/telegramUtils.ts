@@ -18,10 +18,6 @@ if (!TELEGRAM_BOT_TOKEN) {
 	throw new Error('TELEGRAM_BOT_TOKEN is not set in environment variables');
 }
 
-if (!TELEGRAM_API_BASE_URL) {
-	throw new Error('TELEGRAM_API_BASE_URL is not set in environment variables');
-}
-
 registerFont(path.join(__dirname, 'fonts', 'DejaVuSans.ttf'), { family: 'DejaVu Sans' });
 
 export type TelegramCallbackQueryData = 'remove' | 'accept'
