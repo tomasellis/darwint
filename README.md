@@ -8,7 +8,7 @@
 
 - Features an LLM assisted parser to check if the messages received are expenses or not.
 - A command to get back {daily, weekly, monthly, yearly} total of expenses separated by categories and displayed in a pie chart.
-- A whitelist. Should the database table *whitelist* have any user, then only users in the whitelist can interact with the bot. If it's empty, then every user can interact with the bot. I made this decision to keep theh production bot working.
+- A whitelist. Should the database table *whitelist* have any user, then only users in the whitelist can interact with the bot. If it's empty, then every user can interact with the bot. I made this decision to keep the production bot working for everyone and made a few simple scripts to test whitelisting in dev.
 
 There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the production one, it must work without hiccups. There's also [dev-DarwintBot](https://t.me/DevDarwintBot) that may or may not be up and running, which is used for development.
 
