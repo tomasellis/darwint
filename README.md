@@ -110,11 +110,9 @@ POSTGRES_HOST=localhost
 NODE_ENV=development
 ```
 
-You must have a Postgresql database running. 
+We'll be using a PostgreSQL database.
 
-Feel free to skip this if you have your DB url already.
-
-After setting up the .env, with Docker running in the background. Run:
+After setting up the .env, with the Docker desktop running or Docker service running in the background. Run:
 
 ```bash 
 docker-compose up -d
