@@ -78,7 +78,7 @@ Node LTS 22.16.0
 
 NPM 11.4.2
 
-Docker or your own Database URL
+Docker
 ```
 
 Clone the repo:
