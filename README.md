@@ -60,11 +60,11 @@ I have no way of knowing if the bot's response to a message was received by the 
 
 ### Atomic Messages
 
-I'm saving each message from each update atomically as one row in my table, if anything goes wrong and the webhook retries I can be sure that I'm not missing any messages and I'm handling dupes as they come.
+I'm saving each message from each update atomically as one row in my table, if anything goes wrong and the webhook retries I can be sure that I'm not missing any messages and I'm handling dupes as they come. This still works for the polling method as we get an array of updates on each polling run. If we don't acknowledge the update_id + 1 to Telegram, we'll get back the same poll of Updates. Then we compare with our DB, add the ones we don't have and ignore the others. After everything is saved, we acknowledge this update_id by requestingn update_id + 1.
 
 ## Parsing messages
 
-Finally the parsing service. I decided on building a messages queue in my database to handle the requests in order as they come. I'm using Open AI's services with a not so heavy duty prompt to extract the info out of each message we get. If when we try to parse the messages, Open AI's servers are down, we just keep the messages safe in our queue with a *pending* status, and Telegram will keep sending the webhook. When it comes back up, all *pending* messages are processed and sent back in the response payload of each webhook.
+Finally the parsing service. I decided on building a messages queue in my database to handle the requests in order as they come. I'm using Open AI's services with a not so heavy duty prompt to extract the info out of each message we get. If when we try to parse the messages, Open AI's servers are down, we just keep the messages safe in our queue with a *pending* status. When it comes back up, all *pending* messages are processed and sent back to the users with a reply.
 
 ## DB Indexes Addendum
 
