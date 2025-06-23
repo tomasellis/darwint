@@ -2,9 +2,7 @@
 
 import os
 import time
-import select
 import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from dotenv import load_dotenv
 from parser import ExpenseParser
 import json
@@ -36,7 +34,7 @@ def main():
         process_next_message()
 
 def process_next_message():
-    with psycopg2.connect(**DB_PARAMS) as conn2:
+    with psycopg2.connect(**DB_PARAMS) as conn2:  # type: ignore
         with conn2.cursor() as cur2:
             cur2.execute("""
                 SELECT id, user_id, payload, telegram_message_id FROM messages_queue
