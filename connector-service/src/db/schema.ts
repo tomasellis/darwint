@@ -11,6 +11,11 @@ export const money = customType<{
 	},
 });
 
+export const whitelist = pgTable('whitelist', {
+	id: serial('id').primaryKey(),
+	telegramId: integer('telegram_id').unique().notNull(),
+});
+
 export const users = pgTable('users', {
 	id: serial('id').primaryKey(),
 	telegramId: integer('telegram_id').unique().notNull(),
@@ -56,4 +61,6 @@ export type NewExpense = typeof expenses.$inferInsert;
 export type MessageQueue = typeof messagesQueue.$inferSelect;
 export type NewMessageQueue = typeof messagesQueue.$inferInsert;
 export type TelegramUpdate = typeof telegramUpdates.$inferSelect;
-export type NewTelegramUpdate = typeof telegramUpdates.$inferInsert; 
+export type NewTelegramUpdate = typeof telegramUpdates.$inferInsert;
+export type Whitelist = typeof whitelist.$inferSelect;
+export type NewWhitelist = typeof whitelist.$inferInsert; 

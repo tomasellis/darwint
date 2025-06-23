@@ -1,5 +1,5 @@
 import { db } from './db.js';
-import { expenses, messagesQueue, telegramUpdates, users } from './schema.js';
+import { expenses, messagesQueue, telegramUpdates, users, whitelist } from './schema.js';
 import { eq, and, gte, sql } from 'drizzle-orm';
 
 export async function getExpenseTotalsByCategoryQuery(userId: number, startDate: Date): Promise<Array<{ category: string; total: number }>> {
@@ -94,4 +94,12 @@ export async function getNextParsedMessageQuery() {
 		.where(eq(messagesQueue.status, 'parsed'))
 		.orderBy(messagesQueue.createdAt)
 		.limit(1);
+}
+
+export async function getWhitelistEntriesQuery() {
+	return db.select().from(whitelist);
+}
+
+export async function isTelegramIdWhitelistedQuery(telegramId: number) {
+	return db.select().from(whitelist).where(eq(whitelist.telegramId, telegramId)).limit(1);
 }

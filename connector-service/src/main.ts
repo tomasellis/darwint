@@ -1,7 +1,7 @@
 import { getUpdates, sendMessage, getMe, TelegramUpdate, generateInlineKeyboardMarkup, deleteMessage, answerCallbackQuery, TelegramCallbackQuery, generateExpensePieChart, sendPhoto } from './telegramUtils.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Chart, registerables } from 'chart.js';
-import { getLastTelegramUpdateIdQuery, getUserByTelegramIdQuery, getExistingMessageInQueueQuery, getExpenseDataForUserQuery, getNextParsedMessageQuery } from './db/queries.js';
+import { getLastTelegramUpdateIdQuery, getUserByTelegramIdQuery, getExistingMessageInQueueQuery, getExpenseDataForUserQuery, getNextParsedMessageQuery, getWhitelistEntriesQuery, isTelegramIdWhitelistedQuery } from './db/queries.js';
 import { deleteExpenseByTelegramMessageIdMutation, deleteMessageFromQueueMutation, insertUserMutation, setLastTelegramUpdateIdMutation, insertMessageToQueueMutation, updateMessageQueueStatusMutation } from './db/mutations.js';
 
 let lastUpdateId = 0;
@@ -69,6 +69,20 @@ async function processUpdates(updates: TelegramUpdate[]) {
 		console.log('Processing update:', update);
 
 		if (update.message && update.message.text) {
+			const telegramId = update.message.from?.id;
+			if (telegramId) {
+				// Whitelist logic
+				const whitelistEntries = await getWhitelistEntriesQuery();
+				if (whitelistEntries.length > 0) {
+					const isWhitelisted = (await isTelegramIdWhitelistedQuery(telegramId)).length > 0;
+					if (!isWhitelisted) {
+						await sendMessage(update.message.chat.id, '❌ You are not authorized to use this bot.');
+						await setLastTelegramUpdateIdMutation(update.update_id);
+						continue;
+					}
+				}
+			}
+
 			// Handle /start
 			if (update.message.text.trim() === '/start') {
 				await sendMessage(
@@ -130,9 +144,25 @@ async function addMessageToQueue(telegramId: number, chatId: number, message: st
 	try {
 		let user = await getUserByTelegramIdQuery(telegramId);
 
+		// Whitelist logic: if whitelist is not empty, ensure user is whitelisted before adding
+		const whitelistEntries = await getWhitelistEntriesQuery();
+		if (whitelistEntries.length > 0) {
+			const isWhitelisted = (await isTelegramIdWhitelistedQuery(telegramId)).length > 0;
+			if (!isWhitelisted) {
+				console.log(`User ${telegramId} is not whitelisted, skipping message.`);
+				return;
+			}
+		}
+
 		if (user.length === 0) {
-			const newUser = await insertUserMutation(telegramId);
-			user = newUser;
+			// If whitelist is not empty, only add user if they're in whitelist
+			if (whitelistEntries.length === 0 || (await isTelegramIdWhitelistedQuery(telegramId)).length > 0) {
+				const newUser = await insertUserMutation(telegramId);
+				user = newUser;
+			} else {
+				console.log(`User ${telegramId} is not in users and not whitelisted, not adding.`);
+				return;
+			}
 		}
 
 		const existingMessage = await getExistingMessageInQueueQuery(user[0].id, telegramMessageId);
