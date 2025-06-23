@@ -103,3 +103,22 @@ export async function getWhitelistEntriesQuery() {
 export async function isTelegramIdWhitelistedQuery(telegramId: number) {
 	return db.select().from(whitelist).where(eq(whitelist.telegramId, telegramId)).limit(1);
 }
+
+export async function getParsedMessageByTelegramMessageId(telegramMessageId: number) {
+	return db
+		.select({
+			messageId: messagesQueue.id,
+			userId: messagesQueue.userId,
+			chatId: messagesQueue.chatId,
+			payload: messagesQueue.payload,
+			telegramMessageId: messagesQueue.telegramMessageId,
+		})
+		.from(messagesQueue)
+		.where(
+			and(
+				eq(messagesQueue.telegramMessageId, telegramMessageId),
+				eq(messagesQueue.status, 'parsed')
+			)
+		)
+		.limit(1);
+}

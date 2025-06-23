@@ -54,6 +54,13 @@ export const telegramUpdates = pgTable('telegram_updates', {
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+export interface messagePayload {
+	description: string;
+	amount: number;
+	category: string;
+	roast: string;
+}
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Expense = typeof expenses.$inferSelect;

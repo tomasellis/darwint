@@ -3,6 +3,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Chart, registerables } from 'chart.js';
 import { getLastTelegramUpdateIdQuery, getUserByTelegramIdQuery, getExistingMessageInQueueQuery, getExpenseDataForUserQuery, getNextParsedMessageQuery, getWhitelistEntriesQuery, isTelegramIdWhitelistedQuery } from './db/queries.js';
 import { deleteExpenseByTelegramMessageIdMutation, deleteMessageFromQueueMutation, insertUserMutation, setLastTelegramUpdateIdMutation, insertMessageToQueueMutation, updateMessageQueueStatusMutation } from './db/mutations.js';
+import { messagePayload } from './db/schema.js';
 
 let lastUpdateId = 0;
 
@@ -188,8 +189,12 @@ async function startParsedMessageListener() {
 			const result = await getNextParsedMessageQuery();
 			if (result.length > 0) {
 				const message = result[0];
-				console.log(`🔔 Found parsed message to handle:`, message);
-				await handleParsedMessage(message);
+				const typedMessage = {
+					...message,
+					payload: message.payload as messagePayload
+				};
+				console.log(`🔔 Found parsed message to handle:`, typedMessage);
+				await handleParsedMessage(typedMessage);
 			}
 		} catch (err) {
 			console.error('Polling error:', err);
@@ -206,7 +211,7 @@ async function handleParsedMessage(message: {
 	messageId: number;
 	telegramId: number;
 	chatId: number;
-	payload: any;
+	payload: messagePayload;
 	telegramMessageId: number;
 }) {
 	try {
@@ -214,6 +219,7 @@ async function handleParsedMessage(message: {
 
 		const responseMessage =
 			`\n✅ *Expense added* ✅\n\n` +
+			`${payload.roast}\n\n` +
 			`📝 *Description:* ${payload.description ?? 'N/A'}\n` +
 			`💰 *Amount:* ${payload.amount ? new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(Number(payload.amount)) : 'N/A'}\n` +
 			`🗂️ *Category:* ${payload.category}`

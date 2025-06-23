@@ -14,6 +14,7 @@ class ProductExpense(BaseModel):
     product_name: Optional[str] = Field(default=None, description="The name of the product or service")
     amount: Optional[float] = Field(default=None, description="The cost amount in dollars")
     category: Optional[str] = Field(default=None, description="The expense category")
+    roast: Optional[str] = Field(default=None, description="The expense roast")
 
 class ExpenseParser:
     """Parser for expense text using LangChain and OpenAI"""
@@ -21,7 +22,7 @@ class ExpenseParser:
     def __init__(self):
         self.llm = ChatOpenAI(
             model="gpt-3.5-turbo",
-            temperature=0,
+            temperature=0.2,
             api_key=os.getenv("OPENAI_API_KEY")
         )
         
@@ -41,13 +42,14 @@ Analyze the provided message to determine if it describes a personal financial e
 Response Format
 Always respond with valid JSON:
 If NOT a personal expense (greetings, questions, unrelated statements, or truly ambiguous):
-{{"product_name": null, "amount": null, "category": null}}
+{{"product_name": null, "amount": null, "category": null, "roast": null}}
 
 If IS a personal expense, extract:
 
 product_name: The item, service, or recipient being paid for (string)
 amount: Cost in dollars (number only, no symbols or currency words)
 category: Single most appropriate category from the exact list below
+roast: A funny joke/roast on the user's spending habits. Just for fun! Don't just copy the example ones, make your own!
 
 Categories (Use EXACT spelling and capitalization)
 Housing, Transportation, Food, Utilities, Insurance, Medical/Healthcare, Savings, Debt, Education, Entertainment, Other
@@ -74,24 +76,24 @@ Exact Categories: Never create new categories or modify existing names.
 Approach: When genuinely unclear (not just incomplete), return nulls.
 Product Naming: Capitalize the products names when needed for clear understanding.
 
-Examples:
+Examples: Don't copy them word by word.
 Clear Expenses:
 
-"Paid $50 for groceries" → {{"product_name": "Groceries", "amount": 50, "category": "Food"}}
-"Netflix 15 bucks" → {{"product_name": "Netflix", "amount": 15, "category": "Entertainment"}}
-"Doctor visit 150" → {{"product_name": "Doctor visit", "amount": 150, "category": "Medical/Healthcare"}}
-"Gas $40" → {{"product_name": "Gas", "amount": 40, "category": "Transportation"}}
+"Paid $50 for groceries" → {{"product_name": "Groceries", "amount": 50, "category": "Food", "roast":"Someone's hungry..."}}
+"Netflix 15 bucks" → {{"product_name": "Netflix", "amount": 15, "category": "Entertainment", "roast":"Yup, just keep throwing your hard earned cash."}}
+"Doctor visit 150" → {{"product_name": "Doctor visit", "amount": 150, "category": "Medical/Healthcare", "roast":"Time moves even if you stay still..."}}
+"Gas $40" → {{"product_name": "Gas", "amount": 40, "category": "Transportation", "roast":"Just $40 on gas...?"}}
 
 Contextually Clear (Human-interpretable):
 
-"Starbucks 6.50" → {{"product_name": "Starbucks", "amount": 6.50, "category": "Food"}}
-"Rent due 1200" → {{"product_name": "Rent", "amount": 1200, "category": "Housing"}}
-"Sent mom 200" → {{"product_name": "Sent to Mom", "amount": 200, "category": "Other"}}
+"Starbucks 6.50" → {{"product_name": "Starbucks", "amount": 6.50, "category": "Food", "roast":"Millenial alert!!!"}}
+"Rent due 1200" → {{"product_name": "Rent", "amount": 1200, "category": "Housing", "roast":"Chop chop or we out!"}}
+"Sent mom 200" → {{"product_name": "Sent to Mom", "amount": 200, "category": "Other", "roast":"You are a good kid. No roasts."}}
 
 Non-Expenses:
 
-"How are you today?" → {{"product_name": null, "amount": null, "category": null}}
-"What time is it?" → {{"product_name": null, "amount": null, "category": null}}
+"How are you today?" → {{"product_name": null, "amount": null, "category": null, "roast":"null"}}
+"What time is it?" → {{"product_name": null, "amount": null, "category": null, "roast":"null"}}
 
 Processing Instructions:
 
@@ -120,7 +122,7 @@ If yes, extract the most reasonable interpretation of product/service, amount, a
         except Exception as e:
             print(f"Error parsing expense: {e}")
             # Return an empty ProductExpense if parsing fails
-            return ProductExpense(product_name=None, amount=None, category=None)
+            return ProductExpense(product_name=None, amount=None, category=None, roast=None)
     
 def main():
     """Main function to demonstrate the expense parser"""
@@ -145,6 +147,7 @@ def main():
         print(f"Product: {result.product_name}")
         print(f"Amount: ${result.amount}")
         print(f"Category: {result.category}")
+        print(f"Roast: {result.roast}")
         print("-" * 30)
 
 if __name__ == "__main__":

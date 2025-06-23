@@ -51,12 +51,13 @@ def process_next_message():
                 print(f"📨 Got message: id={msg_id}, user_id={user_id}, message={payload['message']}")
                 try:
                     parsed_expense = expense_parser.parse_expense(payload['message'])
-                    print(f"🔍 Parsed expense: {parsed_expense.product_name}, ${parsed_expense.amount}, {parsed_expense.category}")
+                    print(f"🔍 Parsed expense: {parsed_expense.product_name}, ${parsed_expense.amount}, {parsed_expense.category}, {parsed_expense.roast}")
 
                     if (
                         (parsed_expense.product_name is None
                         or parsed_expense.amount is None
-                        or parsed_expense.category is None)
+                        or parsed_expense.category is None
+                        or parsed_expense.roast is None)
                     ):
                         cur2.execute("DELETE FROM messages_queue WHERE id = %s", (msg_id,))
                         print(f"🗑️ Message {msg_id} removed from messages_queue (not an expense)")
@@ -72,7 +73,7 @@ def process_next_message():
                             SET status = 'parsed', processed_at = NOW(), payload = %s
                             WHERE id = %s
                             """,
-                            (json.dumps({"category": parsed_expense.category, "amount":parsed_expense.amount, "description": parsed_expense.product_name}), msg_id)
+                            (json.dumps({"category": parsed_expense.category, "amount":parsed_expense.amount, "description": parsed_expense.product_name, "roast": parsed_expense.roast}), msg_id)
                         )
                         print(f"✅ Message {msg_id} marked as 'parsed'")
                 except Exception as e:
