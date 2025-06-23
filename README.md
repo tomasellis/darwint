@@ -7,14 +7,14 @@
 [DarwintBot](https://t.me/DarwintBot) is a Telegram bot that uses both a Python and a Node service to keep an account of the user's expenses.
 
 - Features an LLM assisted parser to check if the messages received are expenses or not.
-- A command to get back {daily, weekly, monthly, yearly} total of expenses separated by categories and displayed in a pie chart.
-- A whitelist. Should the database table *whitelist* have any user, then only users in the whitelist can interact with the bot. If it's empty, then every user can interact with the bot. I made this decision to keep the production bot working for everyone and made a few simple scripts to test whitelisting in dev.
+- A command to get back the {daily, weekly, monthly, yearly} total of expenses separated by categories and displayed in a pie chart.
+- A whitelist. If the database table *whitelist* has at least one user, then only users in the whitelist can interact with the bot. If it's empty, then every user can interact with the bot. I made this decision to keep the production bot working for everyone and made a few simple scripts to test whitelisting in dev.
 
 There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the production one, it must work without hiccups. There's also [dev-DarwintBot](https://t.me/DevDarwintBot) that may or may not be up and running, which is used for development.
 
 # Using the Bot
 
-After following the setup steps below, the bot must be up and running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
+After following the setup steps below, the bot must be up and running in dev or you can try it out talking with [DarwintBot](https://t.me/DarwintBot). If you created a dev one, you should be able to message it using whatever name you gave it while talking with [@BotFather](https://telegram.me/BotFather).
 
 The bot has 3 main features:
 
