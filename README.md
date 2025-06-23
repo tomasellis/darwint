@@ -14,7 +14,7 @@ There are currently two bots alive. [DarwintBot](https://t.me/DarwintBot) is the
 
 # Using the Bot
 
-After following the previous setup steps, the bot is running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
+After following the setup steps belo, the bot must be up and running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
 
 The bot has 3 main features:
 
