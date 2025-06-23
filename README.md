@@ -75,13 +75,13 @@ I have two main heavy duty queries, one for the messages queue(where I'm mostly 
 ### Requirements
 
 ```bash
-Python 3.11
+Python 3.11.11
 
 Node LTS 22.16.0
 
 NPM 11.4.2
 
-Docker or your own Database URL
+Docker
 ```
 
 Clone the repo:
@@ -114,11 +114,13 @@ POSTGRES_HOST=localhost
 NODE_ENV=development
 ```
 
+<<<<<<< HEAD
 You must have a Postgresql database running.
+=======
+We'll be using a PostgreSQL database.
+>>>>>>> origin/main
 
-Feel free to skip this if you have your DB url already.
-
-After setting up the .env, with Docker running in the background. Run:
+After setting up the .env, with the Docker desktop running or Docker service running in the background. Run:
 
 ```bash
 docker-compose up -d
@@ -159,6 +161,18 @@ The Python parser service, must be run in another terminal:
 ```bash
 cd bot-service
 ```
+<<<<<<< HEAD
+=======
+If you are an **uv user**, run:
+```bash
+uv sync
+```
+Then feel free to activate that .venv/bin/activate or just use ``uv run python main.py`` to use the same Python version I developed with.
+```bash
+uv run python main.py
+```
+or the classic Python way:
+>>>>>>> origin/main
 
 ```bash
 python -m venv venv
