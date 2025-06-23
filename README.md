@@ -1,3 +1,12 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f38246c4-49bc-4a29-98c9-37f0867ff792" width="571" alt="image" />
+</p>
+
+# Description
+DarwintBot is a Telegram bot that uses both a Python and a Node service to keep an account of the user's expenses.
+
+
+
 # Process
 
 ## Exactly One Message
@@ -65,6 +74,7 @@ Create a .env inside /darwint:
 .env:
 
 ```bash
+TELEGRAM_API_BASE_URL='https://api.telegram.org/bot'
 TELEGRAM_BOT_TOKEN=******************
 OPENAI_API_KEY=**********************
 
@@ -87,10 +97,43 @@ After setting up the .env, with Docker running in the background. Run:
 docker-compose up -d
 ```
 
-Finally the services, the Python parser service:
+Finally the services, run the Node bridge service:
+
+```bash
+cd connector-service
+```
+```bash
+npm install
+```
+
+Then we setup our Database:
+
+```bash
+npm run drizzle:push
+```
+and the service:
+
+```bash
+npm run dev
+```
+
+It should start, get the bot's data and start sleeping:
+```bash
+sleeping...
+sleeping...
+sleeping...
+```
+
+The Python parser service, must be run in another terminal:
 
 ```bash
 cd bot-service
+```
+```bash
+python -m venv venv
+```
+```bash
+source venv/bin/activate  # or .\venv\Scripts\activate on windows
 ```
 ```bash
 pip install -r requirements.txt
@@ -99,14 +142,33 @@ pip install -r requirements.txt
 python main.py
 ```
 
-In another terminal, run the Node bridge service:
+It should also start, and then sleep in wait:
 
 ```bash
-cd connector-service
+Polling messages_queue for new messages...
+sleeping...
+sleeping...
+sleeping...
 ```
-```bash
-npm install
-```
-```bash
-npm run dev
-```
+
+# Using the bot
+After following the previous setup steps, the bot is running. You should be able to message it using whatever name you gave it with [@BotFather](https://telegram.me/BotFather).
+
+The bot has 2 main features:
+
+### Parsing expenses
+Send it a message like: 10USD in Bananas or 200 lunch and it will reply with the added product. This way the user confirms that the expense was added. These replies also come with an "X" button that can be used to delete said expense if there was a mistake in the parsing.
+
+<p align="center">
+  <img width="479" alt="image" src="https://github.com/user-attachments/assets/15a63b6e-e79e-4b0c-b659-3864b8f0bf01" />
+</p>
+
+
+### /report
+Is one of the two commands the bot has, the first being **/start** which is just the welcome message. /report comes back with a series of buttons that the user can click to get back a pie chart with their saved expenses(daily, weekly, monthly or yearly).
+
+<p align="center">
+  <img width="351" alt="image" src="https://github.com/user-attachments/assets/5457894b-07c1-431a-abb0-3081ca449d0d" />
+</p>
+
+
