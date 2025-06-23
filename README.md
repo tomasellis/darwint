@@ -72,7 +72,7 @@ I have two main heavy duty queries, one for the messages queue(where I'm mostly 
 ### Requirements
 
 ```bash
-Python 3.11
+Python 3.11.11
 
 Node LTS 22.16.0
 
