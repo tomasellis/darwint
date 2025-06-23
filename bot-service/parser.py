@@ -67,48 +67,36 @@ Other: Personal transfers, gifts, donations, anything not fitting above categori
 
 Key Rules:
 
-Context: Check how the currency is being used, check that the currency exists or if it can be infered. Do not allow any other type of expenses.
+Context: Check how the currency is being used. Be lax on the expenses you allow, after all the user is talking with a financial assistant so they most likely are talking about expenses.
 Ambiguity Resolution: Use contextual reasoning. If a human would reasonably understand the expense despite incomplete information, extract it.
-Real Currency Only: Only process actual monetary transactions, not virtual/game currency/fake currency or whatever other type of exchange that isn't monetary. If it's something else than a REAL WORLD currency, return nulls.
 First Expense Only: If multiple expenses mentioned, extract only the first one.
 Exact Categories: Never create new categories or modify existing names.
-Conservative Approach: When genuinely unclear (not just incomplete), return nulls.
+Approach: When genuinely unclear (not just incomplete), return nulls.
+Product Naming: Capitalize the products names when needed for clear understanding.
 
 Examples:
 Clear Expenses:
 
-"Paid $50 for groceries" → {{"product_name": "groceries", "amount": 50, "category": "Food"}}
+"Paid $50 for groceries" → {{"product_name": "Groceries", "amount": 50, "category": "Food"}}
 "Netflix 15 bucks" → {{"product_name": "Netflix", "amount": 15, "category": "Entertainment"}}
 "Doctor visit 150" → {{"product_name": "Doctor visit", "amount": 150, "category": "Medical/Healthcare"}}
-"Gas $40" → {{"product_name": "gas", "amount": 40, "category": "Transportation"}}
+"Gas $40" → {{"product_name": "Gas", "amount": 40, "category": "Transportation"}}
 
 Contextually Clear (Human-interpretable):
 
 "Starbucks 6.50" → {{"product_name": "Starbucks", "amount": 6.50, "category": "Food"}}
-"Rent due 1200" → {{"product_name": "rent", "amount": 1200, "category": "Housing"}}
-"Sent mom 200" → {{"product_name": "sent to mom", "amount": 200, "category": "Other"}}
+"Rent due 1200" → {{"product_name": "Rent", "amount": 1200, "category": "Housing"}}
+"Sent mom 200" → {{"product_name": "Sent to Mom", "amount": 200, "category": "Other"}}
 
 Non-Expenses:
 
 "How are you today?" → {{"product_name": null, "amount": null, "category": null}}
 "What time is it?" → {{"product_name": null, "amount": null, "category": null}}
 
-Truly Ambiguous:
-
-"Paid $200 for something" → {{"product_name": null, "amount": null, "category": null}}
-"Spent money yesterday" → {{"product_name": null, "amount": null, "category": null}}
-
-Fake Expenses:
-
-"300 doritos for car" → {{"product_name": null, "amount": null, "category": null}}
-"dog for 3 cheetos" → {{"product_name": null, "amount": null, "category": null}}
-"30 doritos for a ride" → {{"product_name": null, "amount": null, "category": null}}
-"20 lays for a flight" → {{"product_name": null, "amount": null, "category": null}}
-
 Processing Instructions:
 
 Read the entire message for context
-Identify if this represents a real financial transaction
+Identify if this represents a financial transaction
 If yes, extract the most reasonable interpretation of product/service, amount, and category
 
 {format_instructions}
