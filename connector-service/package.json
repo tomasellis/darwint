@@ -13,7 +13,9 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"drizzle:generate": "drizzle-kit generate --config=drizzle.config.ts",
 		"drizzle:push": "drizzle-kit push --config=drizzle.config.ts",
-		"drizzle:migrate": "drizzle-kit migrate --config=drizzle.config.ts"
+		"drizzle:migrate": "drizzle-kit migrate --config=drizzle.config.ts",
+		"whitelist:add": "tsx src/test/whitelist-add.ts",
+		"whitelist:clear": "tsx src/test/whitelist-clear.ts"
 	},
 	"keywords": [],
 	"author": "",
