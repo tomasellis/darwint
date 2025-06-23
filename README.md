@@ -114,11 +114,10 @@ POSTGRES_HOST=localhost
 NODE_ENV=development
 ```
 
-<<<<<<< HEAD
 You must have a Postgresql database running.
-=======
+============================================
+
 We'll be using a PostgreSQL database.
->>>>>>> origin/main
 
 After setting up the .env, with the Docker desktop running or Docker service running in the background. Run:
 
@@ -161,18 +160,20 @@ The Python parser service, must be run in another terminal:
 ```bash
 cd bot-service
 ```
-<<<<<<< HEAD
-=======
+
 If you are an **uv user**, run:
+
 ```bash
 uv sync
 ```
+
 Then feel free to activate that .venv/bin/activate or just use ``uv run python main.py`` to use the same Python version I developed with.
+
 ```bash
 uv run python main.py
 ```
+
 or the classic Python way:
->>>>>>> origin/main
 
 ```bash
 python -m venv venv
@@ -197,4 +198,24 @@ Polling messages_queue for new messages...
 sleeping...
 sleeping...
 sleeping...
+```
+
+# Whitelist Test
+
+Once you have the bot up and running. You can easily add a telegram id to the database using:
+
+```bash
+npm run whitelist:add
+```
+
+It'll ask for the ID then. You should see yours logged in your NODE service whenever you send a message to the bot. In the form of **message.from.id** !
+
+To test if you are whitelisted, just add your ID and send a message.
+
+To test if you are blacklisted, just add whatever number and try sending a message.
+
+And you can clear the table with:
+
+```bash
+npm run whitelist:clear
 ```
