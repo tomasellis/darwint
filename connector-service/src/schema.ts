@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, pgEnum, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, timestamp, pgEnum, jsonb, index } from 'drizzle-orm/pg-core';
 import { customType } from 'drizzle-orm/pg-core';
 
 // custom money type for PostgreSQL
@@ -24,7 +24,9 @@ export const expenses = pgTable('expenses', {
   category: text('category').notNull(),
   telegramMessageId: integer('telegram_message_id').notNull(),
   addedAt: timestamp('added_at').notNull(),
-});
+},(t) => [
+  index('user_expenses_idx').on(t.userId.asc(), t.addedAt.asc()),
+]);
 
 export const messageStatusEnum = pgEnum('message_status', ['pending', 'sent', 'failed', 'parsed']);
 
@@ -37,7 +39,9 @@ export const messagesQueue = pgTable('messages_queue', {
   status: messageStatusEnum('status').notNull().default('pending'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   processedAt: timestamp('processed_at'),
-});
+},(t) => [
+  index('message_status_idx').on(t.status.desc(), t.createdAt.asc()),
+]);
 
 export const telegramUpdates = pgTable('telegram_updates', {
   id: serial('id').primaryKey(),
