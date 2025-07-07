@@ -7,39 +7,55 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 
 # Load environment variables from root directory
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 
 class ProductExpense(BaseModel):
     """Schema for parsed product expense data"""
-    product_name: Optional[str] = Field(default=None, description="The name of the product or service")
-    amount: Optional[float] = Field(default=None, description="The cost amount in dollars")
+
+    product_name: Optional[str] = Field(
+        default=None, description="The name of the product or service"
+    )
+    amount: Optional[float] = Field(
+        default=None, description="The cost amount in dollars"
+    )
     category: Optional[str] = Field(default=None, description="The expense category")
     roast: Optional[str] = Field(default=None, description="The expense roast")
 
+
 class ExpenseParser:
     """Parser for expense text using LangChain and OpenAI"""
-    
+
     def __init__(self):
         self.llm = ChatOpenAI(
-            model="gpt-3.5-turbo",
-            temperature=0.5,
-            api_key=os.getenv("OPENAI_API_KEY")
+            model="gpt-3.5-turbo", temperature=0.5, api_key=os.getenv("OPENAI_API_KEY")
         )
-        
+
         self.categories = [
-            "Housing", "Transportation", "Food", "Utilities", 
-            "Insurance", "Medical/Healthcare", "Savings", 
-            "Debt", "Education", "Entertainment", "Other"
+            "Housing",
+            "Transportation",
+            "Food",
+            "Utilities",
+            "Insurance",
+            "Medical/Healthcare",
+            "Savings",
+            "Debt",
+            "Education",
+            "Entertainment",
+            "Other",
         ]
-        
+
         self.parser = PydanticOutputParser(pydantic_object=ProductExpense)
-        
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", """
+
+        self.prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """
 You are a financial assistant specializing in identifying and categorizing personal financial expenses from user messages. You are a financial assistant specializing in identifying and categorizing personal financial expenses from user messages. You are also a ruthless standup comedian who absolutely DESTROYS users about their spending habits. Your roasts should be savage, hilarious, and make them question their life choices while simultaneously making them laugh out loud.
 
 Core Task
-Analyze the provided message to determine if it describes a personal financial expense. Use human-like reasoning to interpret context and resolve ambiguity that might be unclear to other AI systems but obvious to humans.
+Analyze the provided message to determine if it describes a personal financial expense. Use human-like reasoning to interpret context and resolve ambiguity that might be unclear to other AI systems but obvious to humans. If it has a number and it's an ambiguous message, consider that the amount and infer the rest, the user will make the final decision.
 Response Format
 Always respond with valid JSON:
 If NOT a personal expense (greetings, questions, unrelated statements, or truly ambiguous):
@@ -122,32 +138,41 @@ Identify if this represents a financial transaction
 If yes, extract the most reasonable interpretation of product/service, amount, and category. Then make a ROAST so strong they are thinking about it to this day.
 
 {format_instructions}
-"""),
-            ("user", "{input_text}")
-        ])
-    
+""",
+                ),
+                ("user", "{input_text}"),
+            ]
+        )
+
     def parse_expense(self, text: str) -> ProductExpense:
         """Parse expense text and return categorized product data"""
         try:
             chain = self.prompt | self.llm
             # Get raw LLM output
-            raw_output = chain.invoke({
-                "input_text": text,
-                "format_instructions": self.parser.get_format_instructions()
-            })
+            raw_output = chain.invoke(
+                {
+                    "input_text": text,
+                    "format_instructions": self.parser.get_format_instructions(),
+                }
+            )
             print("[DEBUG] Raw LLM output:", raw_output)
             # Parse the output
-            result = self.parser.parse(raw_output.content if hasattr(raw_output, 'content') else raw_output)
+            result = self.parser.parse(
+                raw_output.content if hasattr(raw_output, "content") else raw_output
+            )
             return result
         except Exception as e:
             print(f"Error parsing expense: {e}")
             # Return an empty ProductExpense if parsing fails
-            return ProductExpense(product_name=None, amount=None, category=None, roast=None)
-    
+            return ProductExpense(
+                product_name=None, amount=None, category=None, roast=None
+            )
+
+
 def main():
     """Main function to demonstrate the expense parser"""
     parser = ExpenseParser()
-    
+
     # Example usage
     test_cases = [
         "Pants 30 bucks",
@@ -155,12 +180,12 @@ def main():
         "Gas 45 dollars",
         "Rent 1200 bucks",
         "Netflix 15 bucks",
-        "Doctor visit 150 bucks"
+        "Doctor visit 150 bucks",
     ]
-    
+
     print("Expense Parser Demo")
     print("=" * 50)
-    
+
     for text in test_cases:
         result = parser.parse_expense(text)
         print(f"Input: {text}")
@@ -169,6 +194,7 @@ def main():
         print(f"Category: {result.category}")
         print(f"Roast: {result.roast}")
         print("-" * 30)
+
 
 if __name__ == "__main__":
     main()
